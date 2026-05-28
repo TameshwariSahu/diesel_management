@@ -1,119 +1,124 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import PageHeader from '../components/PageHeader';
+import Pagination from '../components/Pagination';
 import NewAllocation from './NewAllocation';
+import { useTheme } from '../context/ThemeContext';
+
+const StatusBadge = ({ status }) => {
+  const styles = {
+    Approved: { bg: 'rgba(16,185,129,0.1)', color: '#34D399', border: 'rgba(16,185,129,0.2)' },
+    Rejected: { bg: 'rgba(239,68,68,0.1)', color: '#F87171', border: 'rgba(239,68,68,0.2)' },
+    Pending:  { bg: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: 'rgba(245,158,11,0.2)' },
+  };
+  const s = styles[status] || styles.Pending;
+  return (
+    <span style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}`, borderRadius: '20px', padding: '3px 10px', fontSize: '11px', fontWeight: 600, }}>{status}</span>
+  );
+};
 
 const DeptDashboard = () => {
+  const { isDark } = useTheme();
+  const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#475569' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
+  
   const [allocations, setAllocations] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const user = JSON.parse(localStorage.getItem('user'));
-
-  useEffect(() => {
-    fetchAllocations();
-  }, []);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [deptName, setDeptName] = useState('Loading...'); 
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const navigate = useNavigate();
 
   const fetchAllocations = async () => {
     try {
       setLoading(true);
       const res = await axios.get('http://localhost:5000/api/allocations', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+        params: { page: currentPage } 
       });
-      setAllocations(res.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+      setAllocations(res.data.data);
+      setTotalPages(res.data.totalPages);
+    } catch (err) { console.error(err); }
+    finally { setLoading(false); }
+  };
+
+  const fetchDepartmentName = async () => {
+    if (user.department_id) {
+      try {
+        const res = await axios.get('http://localhost:5000/api/masters/departments', {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        });
+        const dept = res.data.find(d => d.id == user.department_id);
+        setDeptName(dept ? dept.dept_name : 'Unknown Department');
+      } catch (err) { setDeptName('Error'); }
     }
   };
 
-  const onLogout = () => {
-    localStorage.clear();
-    window.location.href = '/';
-  };
+  useEffect(() => { fetchAllocations(); fetchDepartmentName(); }, [currentPage]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      <Navbar user={user} onLogout={onLogout} />
-
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-white">Department Dashboard</h1>
-            <p className="text-slate-400 mt-1">Manage your diesel allocations</p>
-          </div>
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className={`px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition transform hover:scale-105 active:scale-95 ${
-              showForm 
-                ? 'bg-red-600 text-white hover:bg-red-700' 
-                : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white hover:from-blue-700 hover:to-blue-600'
-            }`}
-          >
-            {showForm ? '✕ Close Form' : '+ New Allocation'}
+    <div style={{ minHeight: '100vh', background: theme.bg, fontFamily: "'DM Sans', sans-serif" }}>
+      <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');`}</style>
+      {/* <Navbar user={user} deptName={deptName} onLogout={() => { localStorage.clear(); window.location.href = '/'; }} /> */}
+     <Navbar user={user} deptName={deptName} onLogout={() => { localStorage.clear(); window.location.replace('/'); }} />
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
+        
+        <PageHeader title={`${deptName} Dashboard`} subtitle="Manage your diesel allocation requests">
+          <button onClick={() => setShowForm(!showForm)} style={{ background: showForm ? 'rgba(239,68,68,0.1)' : '#3B82F6', border: showForm ? '1px solid rgba(239,68,68,0.2)' : 'none', color: showForm ? '#F87171' : '#fff', borderRadius: '10px', padding: '9px 20px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
+            {showForm ? '✕ Close' : '+ New Allocation'}
           </button>
-        </div>
+        </PageHeader>
 
         {showForm && (
-          <div className="mb-8">
-            <NewAllocation onSuccess={() => {
-              setShowForm(false);
-              fetchAllocations();
-            }} />
+          <div style={{ marginBottom: '1.75rem' }}>
+            <NewAllocation onSuccess={() => { setShowForm(false); fetchAllocations(); }} />
           </div>
         )}
 
-        {/* Allocations Table Card */}
-        <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-white">Your Allocations</h2>
-            <p className="text-slate-400 text-sm mt-1">View and track all your diesel allocation requests</p>
+        <div style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ padding: '1.25rem 1.5rem', borderBottom: `1px solid ${theme.border}` }}>
+            <h2 style={{ color: theme.text, fontSize: '15px', fontWeight: 600, margin: 0 }}>Your Allocations</h2>
+            <p style={{ color: theme.subText, fontSize: '12px', margin: '2px 0 0' }}>{allocations.length} total requests</p>
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="w-8 h-8 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
+            <div style={{ padding: '3rem', textAlign: 'center', color: theme.subText, fontSize: '13px' }}>Loading...</div>
+          ) : allocations.length === 0 ? (
+            <div style={{ padding: '3rem', textAlign: 'center' }}>
+              <p style={{ color: theme.subText, fontSize: '14px' }}>No allocations yet</p>
+              <p style={{ color: theme.subText, fontSize: '12px', marginTop: '4px' }}>Create your first allocation request</p>
             </div>
-          ) : allocations.length > 0 ? (
-            <div className="overflow-x-auto">
-              <table className="w-full">
+          ) : (
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr className="border-b border-slate-700">
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-200">Date</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-200">Vehicle</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-200">Opening (L)</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-200">Allocated (L)</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-200">Closing (L)</th>
-                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-200">Status</th>
+                  <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
+                    {['Date', 'Vehicle', 'Op(KM)', 'Cls(KM)', 'Total (KM)', 'Status'].map(h => (
+                      <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: theme.subText, fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px' }}>{h.toUpperCase()}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {allocations.map((item) => (
-                    <tr key={item.id} className="border-b border-slate-700/50 hover:bg-slate-700/30 transition">
-                      <td className="px-6 py-4 text-sm text-slate-300">{item.allocation_date}</td>
-                      <td className="px-6 py-4 text-sm font-semibold text-white">{item.vehicle_reg_no}</td>
-                      <td className="px-6 py-4 text-sm text-slate-300">{item.opening_balance}</td>
-                      <td className="px-6 py-4 text-sm font-semibold text-blue-400">{item.allocated_diesel}</td>
-                      <td className="px-6 py-4 text-sm text-slate-300">{item.closing_balance}</td>
-                      <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold
-                          ${item.status === 'Approved' ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 
-                            item.status === 'Rejected' ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 
-                            'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
-                          {item.status}
-                        </span>
+                  {allocations.map(item => (
+                    <tr key={item.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{new Date(item.allocation_date).toLocaleDateString()}</td>
+                      <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px', fontWeight: 500 }}>{item.reg_no || item.vehicle_id}</td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.opening_reading || '-'}</td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.closing_reading || '-'}</td>
+                      <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px', fontWeight: 500 }}>
+                        {item.closing_reading && item.opening_reading ? ((Number(item.closing_reading) - Number(item.opening_reading)).toFixed(2)) : '-'}
                       </td>
+                      <td style={{ padding: '12px 16px' }}><StatusBadge status={item.status} /></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-lg text-slate-300">No allocations yet</p>
-              <p className="text-sm text-slate-500 mt-1">Create your first allocation request to get started</p>
-            </div>
           )}
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => setCurrentPage(page)} />
         </div>
       </div>
     </div>

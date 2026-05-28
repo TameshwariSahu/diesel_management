@@ -1,34 +1,107 @@
+
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
-const Navbar = ({ user, onLogout }) => {
+const Navbar = ({ user, onLogout, deptName }) => {
+  const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+
+  // ✅ Logo click karne ka naya function
+  const handleLogoClick = () => {
+    const role = localStorage.getItem('role');
+    if (role === 'admin') {
+      navigate('/admin');
+    } else if (role === 'department') {
+      navigate('/department');
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
-    <nav className="bg-gradient-to-r from-slate-900 to-slate-800 text-white shadow-xl border-b border-slate-700/50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-4">
-          {/* Logo */}
-          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-2xl">⛽</span>
+    <nav style={{
+      background: '#0A0F1E',
+      borderBottom: '1px solid rgba(59,130,246,0.15)',
+      padding: '0 2rem',
+      height: '64px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
+    }}>
+      {/* ✅ Yahan onClick aur cursor: pointer add kiya */}
+      <div 
+        onClick={handleLogoClick} 
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          gap: '12px', 
+          cursor: 'pointer' 
+        }}
+      >
+        <div style={{
+          width: '36px', height: '36px',
+          background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+          borderRadius: '10px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '18px'
+        }}>⛽</div>
+        <div>
+          <div style={{ color: '#F1F5F9', fontWeight: 600, fontSize: '15px', letterSpacing: '-0.3px' }}>
+            Diesel Manager
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-white">Diesel Manager</h1>
-            <p className="text-xs text-slate-400 font-medium">Fleet Fuel System</p>
-          </div>
+          <div style={{ color: '#64748B', fontSize: '11px' }}>Fleet Fuel System</div>
         </div>
+      </div>
 
-        <div className="flex items-center gap-6">
-          <div className="text-right hidden md:block">
-            <p className="font-semibold text-white">{user?.full_name || user?.username}</p>
-            <p className="text-xs text-slate-400 capitalize font-medium">
-              {user?.role === 'admin' ? '👤 Administrator' : '🏢 Department'}
-            </p>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ color: '#F1F5F9', fontSize: '13px', fontWeight: 500 }}>
+            {user?.full_name || user?.username}
           </div>
-          <button 
-            onClick={onLogout}
-            className="bg-slate-700/50 hover:bg-slate-700 border border-slate-600/50 text-white px-4 py-2 rounded-lg text-sm font-semibold transition duration-200 transform hover:scale-105 active:scale-95"
-          >
-            Logout
-          </button>
-        </div>
+          <div style={{ color: '#3B82F6', fontSize: '11px', textTransform: 'capitalize' }}>
+            {user?.role === 'admin' ? 'Administrator' : (deptName || 'Department')}
+          </div>
+        </div>  
+        <button
+          onClick={onLogout}
+          style={{
+            background: 'rgba(239,68,68,0.1)',
+            border: '1px solid rgba(239,68,68,0.25)',
+            color: '#F87171',
+            padding: '7px 16px',
+            borderRadius: '8px',
+            fontSize: '13px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            transition: 'all 0.15s',
+          }}
+          onMouseEnter={e => e.target.style.background = 'rgba(239,68,68,0.2)'}
+          onMouseLeave={e => e.target.style.background = 'rgba(239,68,68,0.1)'}
+        >
+          Logout
+        </button>
+        <button
+          onClick={toggleTheme}
+          style={{
+            background: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+            border: 'none',
+            borderRadius: '8px',
+            width: '35px',
+            height: '35px',
+            fontSize: '18px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+          title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+        >
+          {isDark ? '🌞' : '🌙'}
+        </button>
       </div>
     </nav>
   );

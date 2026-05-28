@@ -1,3 +1,5 @@
+
+
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -13,105 +15,189 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
-        username,
-        password
-      });
+      const res = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+   
+      console.log("Backend Response:", res.data);
 
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('role', res.data.user.role);
+      
+      const userRole = res.data.user?.role || 'department'; 
+      localStorage.setItem('role', userRole);
+    
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
-      if (res.data.user.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/department');
-      }
+      const targetPath = userRole === 'admin' ? '/admin' : '/department';
+      window.location.href = targetPath;
+      
     } catch (err) {
+      console.error("Login Error:", err); 
       setError(err.response?.data?.message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ YE FUNCTION ADD KIYA
+  const handleLogoClick = () => {
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+    if (token && role === 'admin') {
+      navigate('/admin');
+    } else if (token && role === 'department') {
+      navigate('/department');
+    } else {
+      navigate('/');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
-      {/* Animated background blur effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"></div>
-      </div>
+    <div style={{
+      minHeight: '100vh',
+      background: '#080C18',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontFamily: "'DM Sans', sans-serif",
+      padding: '1rem',
+    }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .login-card { animation: fadeUp 0.4s ease; }
+        .login-input { transition: border-color 0.15s, box-shadow 0.15s; }
+        .login-input:focus { outline: none; border-color: #3B82F6 !important; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+        .login-btn:hover:not(:disabled) { background: #2563EB !important; transform: translateY(-1px); }
+        .login-btn:active { transform: translateY(0) !important; }
+        .logo-click { cursor: pointer; transition: opacity 0.15s; }
+        .logo-click:hover { opacity: 0.8; }
+      `}</style>
 
-      <div className="relative w-full max-w-md">
-        <div className="bg-slate-800/80 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 shadow-2xl">
-          <div className="text-center mb-8">
-            {/* Logo Badge */}
-            <div className="flex justify-center mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <span className="text-3xl">⛽</span>
-              </div>
-            </div>
-            <h1 className="text-4xl font-bold text-white mb-2">Diesel Manager</h1>
-            <p className="text-slate-400 text-sm">Vehicle Fuel Management System</p>
-          </div>
-
-          {error && (
-            <div className="mb-6 p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-start gap-3">
-              <span className="text-lg">⚠️</span>
-              <span>{error}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-2">Username</label>
-              <input
-                type="text"
-                placeholder="Enter your username"
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-200 mb-2">Password</label>
-              <input
-                type="password"
-                placeholder="Enter your password"
-                className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold py-3.5 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-0.5 active:translate-y-0"
-            >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  Signing in...
-                </span>
-              ) : (
-                'Sign In'
-              )}
-            </button>
-          </form>
-
-          <div className="mt-6 text-center text-xs text-slate-500">
-            Demo Credentials: admin / password
-          </div>
+      <div className="login-card" style={{
+        background: '#0F172A',
+        border: '1px solid rgba(59,130,246,0.15)',
+        borderRadius: '20px',
+        padding: '2.5rem',
+        width: '100%',
+        maxWidth: '400px',
+        boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          {/* ✅ DONO PE onClick LAGAYA */}
+          <div 
+            className="logo-click"
+            onClick={handleLogoClick}
+            style={{
+              width: '56px', height: '56px',
+              background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
+              borderRadius: '16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '26px', margin: '0 auto 1rem',
+              boxShadow: '0 8px 20px rgba(59,130,246,0.3)',
+            }}>⛽</div>
+          <h1 
+            className="logo-click"
+            onClick={handleLogoClick}
+            style={{ color: '#F1F5F9', fontSize: '24px', fontWeight: 600, margin: 0, letterSpacing: '-0.5px' }}
+          >
+            Diesel Manager
+          </h1>
+          <p style={{ color: '#64748B', fontSize: '13px', marginTop: '4px' }}>
+            Vehicle Fuel Management System
+          </p>
         </div>
+
+        {error && (
+          <div style={{
+            background: 'rgba(239,68,68,0.08)',
+            border: '1px solid rgba(239,68,68,0.2)',
+            borderRadius: '10px',
+            padding: '10px 14px',
+            color: '#F87171',
+            fontSize: '13px',
+            marginBottom: '1.25rem',
+            display: 'flex', alignItems: 'center', gap: '8px',
+          }}>
+            <span>⚠</span> {error}
+          </div>
+        )}
+
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px', letterSpacing: '0.3px' }}>
+              USERNAME
+            </label>
+            <input
+              className="login-input"
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              required
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '10px',
+                padding: '11px 14px',
+                color: '#F1F5F9',
+                fontSize: '14px',
+              }}
+            />
+          </div>
+
+          <div>
+            <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px', letterSpacing: '0.3px' }}>
+              PASSWORD
+            </label>
+            <input
+              className="login-input"
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              style={{
+                width: '100%', boxSizing: 'border-box',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '10px',
+                padding: '11px 14px',
+                color: '#F1F5F9',
+                fontSize: '14px',
+              }}
+            />
+          </div>
+
+          <button
+            className="login-btn"
+            type="submit"
+            disabled={loading}
+            style={{
+              background: '#3B82F6',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '12px',
+              color: '#fff',
+              fontSize: '14px',
+              fontWeight: 600,
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.7 : 1,
+              marginTop: '4px',
+              transition: 'all 0.15s',
+            }}
+          >
+            {loading ? 'Signing in...' : 'Sign In'}
+          </button>
+        </form>
+
+        <p style={{ color: '#334155', fontSize: '12px', textAlign: 'center', marginTop: '1.5rem' }}>
+          Demo: admin / password
+        </p>
       </div>
     </div>
   );
 };
 
 export default Login;
+
