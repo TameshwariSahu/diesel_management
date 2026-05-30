@@ -16,7 +16,7 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { username, password });
+      const res = await axios.post('http://localhost:5000/api/auth/login', { sapId: username, password });
    
       console.log("Backend Response:", res.data);
 
@@ -38,7 +38,6 @@ const Login = () => {
     }
   };
 
-  // ✅ YE FUNCTION ADD KIYA
   const handleLogoClick = () => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
@@ -83,7 +82,7 @@ const Login = () => {
         boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          {/* ✅ DONO PE onClick LAGAYA */}
+       
           <div 
             className="logo-click"
             onClick={handleLogoClick}
@@ -123,14 +122,14 @@ const Login = () => {
         )}
 
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
+                   <div>
             <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px', letterSpacing: '0.3px' }}>
-              USERNAME
+              SAP ID
             </label>
             <input
               className="login-input"
-              type="text"
-              placeholder="Enter your username"
+              type="number" 
+              placeholder="Enter your SAP ID"
               value={username}
               onChange={e => setUsername(e.target.value)}
               required

@@ -6,6 +6,7 @@ import PageHeader from '../components/PageHeader';
 import Pagination from '../components/Pagination';
 import { useTheme } from '../context/ThemeContext';
 
+
 const StatusBadge = ({ status }) => {
   const styles = {
     Approved: { bg: 'rgba(16,185,129,0.1)', color: '#34D399', border: 'rgba(16,185,129,0.2)' },
@@ -84,14 +85,17 @@ const AdminDashboard = () => {
   };
 
   return (
+    
     <div style={{ minHeight: '100vh', background: theme.bg, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');`}</style>
-      {/* <Navbar user={user} onLogout={() => { localStorage.clear(); window.location.href = '/'; }} /> */}
       <Navbar user={user} onLogout={() => { localStorage.clear(); window.location.replace('/'); }} />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         <PageHeader title="Admin Dashboard" subtitle="Manage and review all diesel allocations">
           <button style={navBtn} onClick={() => navigate('/admin/vehicles')}>Vehicles</button>
+          <button style={navBtn} onClick={() => navigate('/admin/sections')}>Sections</button>
           <button style={navBtn} onClick={() => navigate('/admin/departments')}>Departments</button>
+              <button style={navBtn} onClick={() => navigate('/admin/employees')}>Employees</button>
+          
         </PageHeader>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.75rem' }}>

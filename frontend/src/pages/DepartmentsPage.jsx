@@ -43,7 +43,6 @@ export default function DepartmentsPage() {
     setDepartments(res.data);
   };
 
-  // ✅ Users load karne ka naya function
   const loadUsers = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/masters/users", { headers });
@@ -102,10 +101,9 @@ export default function DepartmentsPage() {
               required
             >
               <option value="" style={{ background: '#1E293B' }}>Select Incharge</option>
-              {users.map(u => (
-              
-                <option key={u.id} value={`${u.id} - ${u.full_name || u.username}`} style={{ background: '#1E293B' }}>
-                  ID: {u.id} - {u.full_name || u.username}
+             {users.map(u => (
+                <option key={u.id} value={u.id} style={{ background: '#1E293B' }}>
+                  ID: {u.id} - {u.name}
                 </option>
               ))}
               <option value="custom" style={{ background: '#1E293B', color: '#F59E0B' }}>➕ Enter Custom ID</option>
