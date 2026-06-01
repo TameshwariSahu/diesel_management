@@ -1,3 +1,55 @@
+//  const db = require("../config/db");
+// const bcrypt = require("bcryptjs");
+// const jwt = require("jsonwebtoken");
+
+// exports.login = (req, res) => {
+//   const { sapId, password } = req.body; 
+
+//   const cleanSapId = parseInt(sapId, 10); 
+
+//   const sql = "SELECT * FROM employees WHERE sap_id = ?";
+
+//   db.query(sql, [cleanSapId], (err, results) => {
+//     if (err) return res.status(500).json({ error: err.message });
+
+//     console.log("Found user:", results.length > 0 ? results[0].name : "None");
+
+//     if (results.length === 0) return res.status(401).json({ message: "Invalid credentials" });
+
+//     const user = results[0];
+//     console.log("DEBUG Password Check:", { 
+//     db_password: user.password, 
+//     input_password: password, 
+//     are_equal: user.password === password 
+// });
+
+// if (user.password === password) {
+//   const token = jwt.sign(
+//     {
+//       id: user.id,
+//       role: user.role,
+//       department_id: user.dept_id,
+//       username: user.name
+//     },
+//     process.env.JWT_SECRET,
+//     { expiresIn: '8h' }
+//   );
+//   return res.json({
+//     token,
+//     user: {
+//       id: user.id,
+//       name: user.name,
+//       role: user.role,
+//       department_id: user.dept_id,
+//       sap_id: user.sap_id
+//     }
+//   });
+// } else {
+//   return res.status(401).json({ message: "Invalid credentials" });
+// }
+//   });
+// };
+
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -5,17 +57,46 @@ const jwt = require("jsonwebtoken");
 exports.login = (req, res) => {
   const { sapId, password } = req.body; 
 
+  const cleanSapId = parseInt(sapId, 10); 
+
   const sql = "SELECT * FROM employees WHERE sap_id = ?";
 
-  db.query(sql, [sapId], (err, results) => {
+  db.query(sql, [cleanSapId], (err, results) => {
     if (err) return res.status(500).json({ error: err.message });
+
     if (results.length === 0) return res.status(401).json({ message: "Invalid credentials" });
 
     const user = results[0];
 
+    // Optional: Keep this for debugging, remove it later if you want
+    // console.log("DEBUG Password Check:", { 
+    //   db_password: user.password, 
+    //   input_password: password, 
+    //   are_equal: user.password === password 
+    // });
+
     if (user.password === password) {
-      const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      return res.json({ token, role: user.role, user: user });
+      const token = jwt.sign(
+        {
+          id: user.id,
+          role: user.role,
+          department_id: user.dept_id, // ✅ FIXED: Changed to user.dept_id
+          name: user.name
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '8h' }
+      );
+      
+      return res.json({
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          role: user.role,
+          department_id: user.dept_id, // ✅ FIXED: Changed to user.dept_id
+          sap_id: user.sap_id
+        }
+      });
     } else {
       return res.status(401).json({ message: "Invalid credentials" });
     }

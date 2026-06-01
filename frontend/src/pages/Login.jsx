@@ -11,23 +11,64 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError('');
+  //   try {
+  //     const res = await axios.post('http://localhost:5000/api/auth/login', { sapId: username, password });
+   
+  //     console.log("Backend Response:", res.data);
+
+  //     localStorage.setItem('token', res.data.token);
+   
+  //     const userRole = res.data.user.role; 
+
+  //     console.log("Role received from backend:", userRole); 
+  //     localStorage.setItem('role', userRole);
+    
+  //     localStorage.setItem('user', JSON.stringify(res.data.user));
+
+  //     const targetPath = userRole === 'admin' ? '/admin' : '/department';
+  //     window.location.href = targetPath;
+      
+  //   } catch (err) {
+  //     console.error("Login Error:", err); 
+  //     setError(err.response?.data?.message || 'Login failed');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { sapId: username, password });
+      const res = await axios.post('http://localhost:5000/api/auth/login', { 
+        sapId: username, 
+        password: password 
+      });
    
-      console.log("Backend Response:", res.data);
+      console.log("FULL BACKEND RESPONSE:", res.data);
 
-      localStorage.setItem('token', res.data.token);
+      // ✅ EXPLICITLY get the role from the response
+      const backendRole = res.data.user.role;
+      console.log("Extracted Role for Routing:", backendRole);
+
+      // ✅ FIX: Directly check the role. No defaults.
+      const targetPath = backendRole === 'admin' ? '/admin' : '/department';
       
-      const userRole = res.data.user?.role || 'department'; 
-      localStorage.setItem('role', userRole);
-    
+      console.log("Redirecting to:", targetPath);
+
+      // ✅ Clear old storage to be safe
+      localStorage.clear();
+
+      // Save new data
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('role', backendRole); // Save the specific role we checked
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
-      const targetPath = userRole === 'admin' ? '/admin' : '/department';
+      // ✅ Force redirect
       window.location.href = targetPath;
       
     } catch (err) {
@@ -37,7 +78,6 @@ const Login = () => {
       setLoading(false);
     }
   };
-
   const handleLogoClick = () => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
@@ -129,8 +169,10 @@ const Login = () => {
             <input
               className="login-input"
               type="number" 
-              placeholder="Enter your SAP ID"
+              placeholder="Enter 7-digit SAP ID"
               value={username}
+              min="1000000"
+              max="9999999"
               onChange={e => setUsername(e.target.value)}
               required
               style={{

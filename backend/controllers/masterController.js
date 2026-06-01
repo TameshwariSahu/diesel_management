@@ -1,11 +1,25 @@
 const db = require('../config/db');
 
+// exports.getDepartments = (req, res) => {
+//   const sql = `
+//     SELECT d.*, e.name as incharge_name 
+//     FROM departments d
+//     LEFT JOIN employees e ON d.incharge_id = e.id
+//     WHERE d.status = 'active'
+//   `;
+  
+//   db.query(sql, (err, results) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json(results);
+//   });
+// };
 exports.getDepartments = (req, res) => {
   const sql = `
-    SELECT d.*, e.name as incharge_name 
+    SELECT d.id, d.name, d.status, e.name as incharge_name 
     FROM departments d
     LEFT JOIN employees e ON d.incharge_id = e.id
     WHERE d.status = 'active'
+    ORDER BY d.name ASC
   `;
   
   db.query(sql, (err, results) => {
@@ -204,12 +218,183 @@ exports.addEmployee = (req, res) => {
   });
 };
 
-// Get All Sections
-exports.getSections = (req, res) => {
+// // Get All Sections
+// exports.getSections = (req, res) => {
+//   const sql = `
+//     SELECT s.*, d.name as dept_name
+//     FROM sections s
+//     LEFT JOIN departments d ON s.dept_id = d.id
+//   `;
+  
+//   db.query(sql, (err, results) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json(results);
+//   });
+// };
+
+// // Get All Sections
+// exports.getSections = (req, res) => {
+//   const sql = `
+//     SELECT s.*, d.name as dept_name
+//     FROM sections s
+//     LEFT JOIN departments d ON s.dept_id = d.id
+//   `;
+  
+//   db.query(sql, (err, results) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json(results);
+//   });
+// };
+
+// // Add Section
+// exports.addSection = (req, res) => {
+//   const { section_name, dept_id } = req.body;
+
+//   if (!section_name) return res.status(400).json({ message: "Section name is required" });
+
+//   const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
+  
+//   db.query(sql, [section_name, dept_id], (err, result) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json({ message: "Section added successfully", id: result.insertId });
+//   });
+// };
+
+// // Get All Sections
+// exports.getSections = (req, res) => {
+//   const sql = `
+//     SELECT s.*, d.name as dept_name
+//     FROM sections s
+//     LEFT JOIN departments d ON s.dept_id = d.id
+//   `;
+  
+//   db.query(sql, (err, results) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json(results);
+//   });
+// };
+
+// // Add Section
+// exports.addSection = (req, res) => {
+//   const { section_name, dept_id } = req.body;
+
+//   if (!section_name) return res.status(400).json({ message: "Section name is required" });
+
+//   const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
+  
+//   db.query(sql, [section_name, dept_id], (err, result) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json({ message: "Section added successfully", id: result.insertId });
+//   });
+// };
+
+// // Get All Sections
+// exports.getSections = (req, res) => {
+//   const sql = `
+//     SELECT s.*, d.name as dept_name
+//     FROM sections s
+//     LEFT JOIN departments d ON s.dept_id = d.id
+//   `;
+  
+//   db.query(sql, (err, results) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json(results);
+//   });
+// };
+
+// // Add Section
+// exports.addSection = (req, res) => {
+//   const { section_name, dept_id } = req.body;
+
+//   if (!section_name) return res.status(400).json({ message: "Section name is required" });
+
+//   const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
+  
+//   db.query(sql, [section_name, dept_id], (err, result) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json({ message: "Section added successfully", id: result.insertId });
+//   });
+// };
+
+// // Update Section Status
+// // Get All Sections
+// exports.getSections = (req, res) => {
+//   const sql = `
+//     SELECT s.*, d.name as dept_name
+//     FROM sections s
+//     LEFT JOIN departments d ON s.dept_id = d.id
+//   `;
+  
+//   db.query(sql, (err, results) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json(results);
+//   });
+// };
+
+// // Add Section
+// exports.addSection = (req, res) => {
+//   const { section_name, dept_id } = req.body;
+
+//   if (!section_name) return res.status(400).json({ message: "Section name is required" });
+
+//   const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
+  
+//   db.query(sql, [section_name, dept_id], (err, result) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json({ message: "Section added successfully", id: result.insertId });
+//   });
+// };
+// // Get All Sections
+// exports.getSections = (req, res) => {
+//   const sql = `
+//     SELECT s.*, d.name as dept_name
+//     FROM sections s
+//     LEFT JOIN departments d ON s.dept_id = d.id
+//   `;
+  
+//   db.query(sql, (err, results) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json(results);
+//   });
+// };
+// // Add Section
+// exports.addSection = (req, res) => {
+//   const { section_name, dept_id } = req.body;
+
+//   if (!section_name) return res.status(400).json({ message: "Section name is required" });
+
+//   const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
+  
+//   db.query(sql, [section_name, dept_id], (err, result) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json({ message: "Section added successfully", id: result.insertId });
+//   });
+// };
+
+// // Update Section Status
+// exports.updateSectionStatus = (req, res) => {
+//   const { status } = req.body;
+//   const { id } = req.params;
+  
+//   const sql = "UPDATE sections SET status = ? WHERE id = ?";
+//   db.query(sql, [status, id], (err, result) => {
+//     if (err) return res.status(500).json({ error: err.message });
+//     res.json({ message: "Status updated", status });
+//   });
+// };
+
+
+
+// --- DEPARTMENTS ---
+
+// Get Departments (Used to populate dropdowns)
+exports.getDepartments = (req, res) => {
   const sql = `
-    SELECT s.*, d.name as dept_name
-    FROM sections s
-    LEFT JOIN departments d ON s.dept_id = d.id
+    SELECT d.id, d.name, d.status, e.name as incharge_name 
+    FROM departments d
+    LEFT JOIN employees e ON d.incharge_id = e.id
+    WHERE d.status = 'active'
+    ORDER BY d.name ASC
   `;
   
   db.query(sql, (err, results) => {
@@ -218,12 +403,15 @@ exports.getSections = (req, res) => {
   });
 };
 
-// Get All Sections
+// --- SECTIONS ---
+
+// Get All Sections (With Department Name for the table)
 exports.getSections = (req, res) => {
   const sql = `
     SELECT s.*, d.name as dept_name
     FROM sections s
     LEFT JOIN departments d ON s.dept_id = d.id
+    ORDER BY s.id DESC
   `;
   
   db.query(sql, (err, results) => {
@@ -232,122 +420,13 @@ exports.getSections = (req, res) => {
   });
 };
 
-// Add Section
+// Add New Section
 exports.addSection = (req, res) => {
   const { section_name, dept_id } = req.body;
 
-  if (!section_name) return res.status(400).json({ message: "Section name is required" });
-
-  const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
-  
-  db.query(sql, [section_name, dept_id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Section added successfully", id: result.insertId });
-  });
-};
-
-// Get All Sections
-exports.getSections = (req, res) => {
-  const sql = `
-    SELECT s.*, d.name as dept_name
-    FROM sections s
-    LEFT JOIN departments d ON s.dept_id = d.id
-  `;
-  
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-};
-
-// Add Section
-exports.addSection = (req, res) => {
-  const { section_name, dept_id } = req.body;
-
-  if (!section_name) return res.status(400).json({ message: "Section name is required" });
-
-  const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
-  
-  db.query(sql, [section_name, dept_id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Section added successfully", id: result.insertId });
-  });
-};
-
-// Get All Sections
-exports.getSections = (req, res) => {
-  const sql = `
-    SELECT s.*, d.name as dept_name
-    FROM sections s
-    LEFT JOIN departments d ON s.dept_id = d.id
-  `;
-  
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-};
-
-// Add Section
-exports.addSection = (req, res) => {
-  const { section_name, dept_id } = req.body;
-
-  if (!section_name) return res.status(400).json({ message: "Section name is required" });
-
-  const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
-  
-  db.query(sql, [section_name, dept_id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Section added successfully", id: result.insertId });
-  });
-};
-
-// Update Section Status
-// Get All Sections
-exports.getSections = (req, res) => {
-  const sql = `
-    SELECT s.*, d.name as dept_name
-    FROM sections s
-    LEFT JOIN departments d ON s.dept_id = d.id
-  `;
-  
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-};
-
-// Add Section
-exports.addSection = (req, res) => {
-  const { section_name, dept_id } = req.body;
-
-  if (!section_name) return res.status(400).json({ message: "Section name is required" });
-
-  const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
-  
-  db.query(sql, [section_name, dept_id], (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json({ message: "Section added successfully", id: result.insertId });
-  });
-};
-// Get All Sections
-exports.getSections = (req, res) => {
-  const sql = `
-    SELECT s.*, d.name as dept_name
-    FROM sections s
-    LEFT JOIN departments d ON s.dept_id = d.id
-  `;
-  
-  db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(results);
-  });
-};
-// Add Section
-exports.addSection = (req, res) => {
-  const { section_name, dept_id } = req.body;
-
-  if (!section_name) return res.status(400).json({ message: "Section name is required" });
+  if (!section_name || !dept_id) {
+    return res.status(400).json({ message: "Section Name and Department are required" });
+  }
 
   const sql = "INSERT INTO sections (section_name, dept_id) VALUES (?, ?)";
   
