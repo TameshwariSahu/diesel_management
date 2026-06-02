@@ -108,9 +108,8 @@
 //   );
 // }
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import { useTheme } from '../context/ThemeContext';
@@ -130,7 +129,6 @@ const input = {
 const select = { ...input, cursor: "pointer" };
 
 export default function SectionsPage() {
-  const navigate = useNavigate();
   const { isDark } = useTheme();
   const theme = { 
     bg: isDark ? '#080C18' : '#F1F5F9', 
@@ -146,13 +144,11 @@ export default function SectionsPage() {
 
   const [sections, setSections] = useState([]);
   const [departments, setDepartments] = useState([]); // NEW: State to hold departments
-  const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({ section_name: "", dept_id: "" });
 
   // Fetch both Sections and Departments on load
   const load = async () => {
-    setLoading(true);
     try {
       // Fetch Sections
       const secRes = await axios.get("http://localhost:5000/api/masters/sections", { headers });
@@ -160,11 +156,10 @@ export default function SectionsPage() {
 
       // Fetch Departments (for the dropdown)
       const deptRes = await axios.get("http://localhost:5000/api/masters/departments", { headers });
-      setDepartments(deptRes.data);
+      setDepartments(deptRes.data.filter(dept => dept.status === 'active'));
     } catch (err) { 
       console.error(err); 
     }
-    finally { setLoading(false); }
   };
 
   useEffect(() => {
@@ -188,15 +183,6 @@ export default function SectionsPage() {
     } catch (err) {
       alert(err.response?.data?.message || "Error adding section");
     }
-  };
-
-  const toggleStatus = async (id, currentStatus) => {
-    await axios.put(
-      `http://localhost:5000/api/masters/sections/${id}/status`, 
-      { status: currentStatus === "active" ? "inactive" : "active" }, 
-      { headers }
-    );
-    load();
   };
 
   return (
@@ -258,7 +244,7 @@ export default function SectionsPage() {
           <table style={{ width: "100%", borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                {['Section Name', 'Department', 'Status', 'Action'].map(h => (
+                {['Section Name', 'Department'].map(h => (
                   <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>{h.toUpperCase()}</th>
                 ))}
               </tr>
@@ -268,24 +254,6 @@ export default function SectionsPage() {
                 <tr key={v.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
                   <td style={{ padding: '12px 16px', color: theme.text, fontWeight: 600, fontSize: "13px" }}>{v.section_name}</td>
                   <td style={{ padding: '12px 16px', color: theme.subText, fontSize: "13px" }}>{v.dept_name || "-"}</td>
-                  <td style={{ padding: '12px 16px', color: v.status === "active" ? "#34D399" : "#F87171", fontSize: "13px", fontWeight: 600 }}>{v.status}</td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <button 
-                      onClick={() => toggleStatus(v.id, v.status)} 
-                      style={{ 
-                        background: v.status === 'active' ? "rgba(239,68,68,0.1)" : "rgba(16,185,129,0.1)", 
-                        border: `1px solid ${theme.border}`, 
-                        color: v.status === 'active' ? '#F87171' : '#34D399', 
-                        borderRadius: 6, 
-                        padding: '4px 10px', 
-                        fontSize: '11px', 
-                        fontWeight: 600, 
-                        cursor: 'pointer' 
-                      }}
-                    >
-                      {v.status === 'active' ? 'Deactivate' : 'Activate'}
-                    </button>
-                  </td>
                 </tr>
               ))}
             </tbody>

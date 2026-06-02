@@ -1,32 +1,45 @@
 const db = require("../config/db");
+const { toTitleCase } = require("../utils/formatters");
 
 exports.createAllocation = (req, res) => {
   const {
     allocation_date,
     vehicle_id,
+    section_id,
     opening_reading,
     closing_reading,
-    authorized_by, 
+    authorized_by,
     remarks
   } = req.body;
 
   const user = req.user;
+  const openingReading = Number(opening_reading);
+  const closingReading = Number(closing_reading);
+
+  if (!Number.isFinite(openingReading) || !Number.isFinite(closingReading)) {
+    return res.status(400).json({ message: "Opening and closing readings must be valid numbers." });
+  }
+
+  if (closingReading <= openingReading) {
+    return res.status(400).json({ message: "Closing reading must be greater than opening reading." });
+  }
 
 const sql = `
   INSERT INTO diesel_allocations 
-    (allocation_date, vehicle_id, department_id, opening_reading, closing_reading, authorized_by, remarks, status, modified_by)
-  VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', ?)
+    (allocation_date, vehicle_id, department_id, section_id, opening_reading, closing_reading, authorized_by, remarks, status, modified_by)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', ?)
 `;
 
 const params = [
   allocation_date,
   vehicle_id,
   user.department_id,
-  opening_reading,
-  closing_reading,
-  authorized_by || 'N/A',
-  remarks || null,
-  user.username
+  section_id || null,
+  openingReading,
+  closingReading,
+  toTitleCase(authorized_by || 'N/A'),
+  remarks ? toTitleCase(remarks) : null,
+  user.name || null
 ];
 
   db.query(sql, params, (err, result) => {
@@ -55,7 +68,7 @@ exports.getAllocations = (req, res) => {
   let params = [];
   let countParams = [];
 
-  if (role === "department") {
+  if (role !== "admin") {
     sql += " WHERE da.department_id = ?";
     countSql += " WHERE da.department_id = ?";
     params = [department_id];
@@ -90,8 +103,8 @@ exports.updateStatus = (req, res) => {
   }
 
   db.query(
-    'UPDATE diesel_allocations SET status=?, change_reason=?, modified_date=NOW() WHERE id=?',
-    [status, change_reason || null, id],
+    'UPDATE diesel_allocations SET status=?, change_reason=?, modified_by=?, modified_date=NOW() WHERE id=?',
+    [status, change_reason ? toTitleCase(change_reason) : null, req.user.name || null, id],
     (err) => {
       if (err) return res.status(500).json(err);
       res.json({ message: 'Status updated successfully' });

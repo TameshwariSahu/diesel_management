@@ -25,12 +25,10 @@ app.get('/', (req, res) => {
 });
 
 // 3. API ROUTES 
+app.use('/api/auth/login', limiter);
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/masters', require('./routes/masterRoutes'));
 app.use('/api/allocations', require('./routes/allocationRoutes'));
-
-// Rate limit 
-app.use('/api/auth/login', limiter);
 
 
 // ====================================================================

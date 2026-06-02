@@ -33,6 +33,6 @@ router.post('/sections', verifyToken, isAdmin, addSection);
 // ✅ UPDATE STATUS ROUTES (Department & Vehicle)
 router.put('/departments/:id/status', verifyToken, isAdmin, updateDepartmentStatus);
 router.put('/vehicles/:id/status', verifyToken, isAdmin, updateVehicleStatus);
-router.put('/sections/:id/status', verifyToken, isAdmin, updateSectionStatus)
+router.put('/sections/:id/status', verifyToken, isAdmin, updateSectionStatus);
 
 module.exports = router;

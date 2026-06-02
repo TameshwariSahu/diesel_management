@@ -399,9 +399,8 @@
 //   );
 // }
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
@@ -456,7 +455,6 @@ const Toast = ({ message, type, onClose }) => {
 };
 
 export default function EmployeesPage() {
-  const navigate = useNavigate();
   const { isDark } = useTheme();
   const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#94A3B8' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -495,7 +493,7 @@ export default function EmployeesPage() {
   const loadDepartments = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/masters/departments", { headers });
-      setDepartments(res.data);
+      setDepartments(res.data.filter(dept => dept.status === 'active'));
     } catch (err) { console.error(err); }
   };
 

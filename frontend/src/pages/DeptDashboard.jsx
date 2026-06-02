@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import PageHeader from '../components/PageHeader';
 import Pagination from '../components/Pagination';
 import NewAllocation from './NewAllocation';
 import { useTheme } from '../context/ThemeContext';
+import { formatDisplayDate } from '../utils/date';
 
 const StatusBadge = ({ status }) => {
   const styles = {
@@ -30,8 +30,6 @@ const DeptDashboard = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [deptName, setDeptName] = useState('Loading...'); 
   const user = JSON.parse(localStorage.getItem('user') || '{}');
-  const navigate = useNavigate();
-
   const fetchAllocations = async () => {
     try {
       setLoading(true);
@@ -52,8 +50,8 @@ const DeptDashboard = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         const dept = res.data.find(d => d.id == user.department_id);
-        setDeptName(dept ? dept.dept_name : 'Unknown Department');
-      } catch (err) { setDeptName('Error'); }
+        setDeptName(dept ? dept.name : 'Unknown Department');
+      } catch { setDeptName('Error'); }
     }
   };
 
@@ -96,7 +94,7 @@ const DeptDashboard = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                    {['Date', 'Vehicle', 'Op(KM)', 'Cls(KM)', 'Total (KM)', 'Status'].map(h => (
+                    {['Date', 'Vehicle', 'Total (KM)', 'Authorized By', 'Remarks', 'Status', 'Reason'].map(h => (
                       <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: theme.subText, fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px' }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
@@ -104,14 +102,15 @@ const DeptDashboard = () => {
                 <tbody>
                   {allocations.map(item => (
                     <tr key={item.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
-                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{new Date(item.allocation_date).toLocaleDateString()}</td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{formatDisplayDate(item.allocation_date)}</td>
                       <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px', fontWeight: 500 }}>{item.reg_no || item.vehicle_id}</td>
-                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.opening_reading || '-'}</td>
-                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.closing_reading || '-'}</td>
                       <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px', fontWeight: 500 }}>
                         {item.closing_reading && item.opening_reading ? ((Number(item.closing_reading) - Number(item.opening_reading)).toFixed(2)) : '-'}
                       </td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.authorized_by || '-'}</td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.remarks || '-'}</td>
                       <td style={{ padding: '12px 16px' }}><StatusBadge status={item.status} /></td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.change_reason || '-'}</td>
                     </tr>
                   ))}
                 </tbody>

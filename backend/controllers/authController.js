@@ -75,7 +75,13 @@ exports.login = (req, res) => {
     //   are_equal: user.password === password 
     // });
 
-    if (user.password === password) {
+    const storedPassword = user.password || '';
+    const isHashedPassword = storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$') || storedPassword.startsWith('$2y$');
+    const passwordMatches = isHashedPassword
+      ? bcrypt.compareSync(password, storedPassword)
+      : storedPassword === password;
+
+    if (passwordMatches) {
       const token = jwt.sign(
         {
           id: user.id,

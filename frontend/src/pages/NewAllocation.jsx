@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { getTodayInputValue } from '../utils/date';
 
 const inputStyle = {
   width: '100%', boxSizing: 'border-box',
@@ -15,27 +16,10 @@ const labelStyle = {
   display: 'block', marginBottom: '5px', letterSpacing: '0.3px',
 };
 
-const selectStyle = {
-  background: '#1E293B',
-  border: '1px solid rgba(59,130,246,0.3)',
-  borderRadius: '10px',
-  padding: '10px 12px',
-  color: '#F1F5F9',
-  fontSize: '13px',
-  width: '100%',
-  boxSizing: 'border-box',
-  cursor: 'pointer',
-  appearance: 'none',
-  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2360A5FA' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
-  backgroundRepeat: 'no-repeat',
-  backgroundPosition: 'right 12px center',
-  paddingRight: '32px',
-};
-
 const NewAllocation = ({ onSuccess }) => {
   const [vehicles, setVehicles] = useState([]);
   const [formData, setFormData] = useState({
-  allocation_date: new Date().toISOString().split('T')[0],
+  allocation_date: getTodayInputValue(),
   vehicle_id: '',
   opening_reading: '',     
   closing_reading: '',     
@@ -49,7 +33,8 @@ const NewAllocation = ({ onSuccess }) => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
     axios.get('http://localhost:5000/api/masters/vehicles', {
-      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      params: { all: true }
     }).then(res => {
       const allVehicles = res.data.data || res.data || []; 
       
@@ -71,6 +56,14 @@ const NewAllocation = ({ onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const openingReading = Number(formData.opening_reading);
+    const closingReading = Number(formData.closing_reading);
+
+    if (closingReading <= openingReading) {
+      setMessage('error:Closing reading must be greater than opening reading.');
+      return;
+    }
+
     setLoading(true);
     setMessage('');
     try {
@@ -79,13 +72,11 @@ const NewAllocation = ({ onSuccess }) => {
         {
           ...formData,
           vehicle_id: Number(formData.vehicle_id),
+          section_id: vehicles.find(v => String(v.id) === String(formData.vehicle_id))?.section_id || null,
         },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
 console.log("result",result)
-      if(!result) {
-
-      }
       setMessage('success');
       setTimeout(() => onSuccess?.(), 1500);
     } catch (err) {

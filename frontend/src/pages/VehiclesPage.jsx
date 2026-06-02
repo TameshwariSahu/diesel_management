@@ -1,18 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
 import { useTheme } from '../context/ThemeContext';
+import { formatDisplayDate } from '../utils/date';
 
 const StatusBadge = ({ status }) => {
   const styles = {
-    Approved: { bg: 'rgba(16,185,129,0.1)', color: '#34D399', border: 'rgba(16,185,129,0.2)' },
-    Rejected: { bg: 'rgba(239,68,68,0.1)', color: '#F87171', border: 'rgba(239,68,68,0.2)' },
-    Pending:  { bg: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: 'rgba(245,158,11,0.2)' },
+    active: { bg: 'rgba(16,185,129,0.1)', color: '#34D399', border: 'rgba(16,185,129,0.2)' },
+    inactive: { bg: 'rgba(239,68,68,0.1)', color: '#F87171', border: 'rgba(239,68,68,0.2)' },
   };
-  const s = styles[status] || styles.Pending;
+  const s = styles[status] || styles.active;
   return (
     <span style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}`, borderRadius: '20px', padding: '3px 10px', fontSize: '11px', fontWeight: 600, }}>{status}</span>
   );
@@ -37,7 +36,6 @@ const select = {
 };
 
 export default function VehiclesPage() {
-  const navigate = useNavigate();
   const { isDark } = useTheme();
   const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#94A3B8' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -45,6 +43,8 @@ export default function VehiclesPage() {
   const headers = { Authorization: `Bearer ${token}` };
 
   const [vehicles, setVehicles] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -85,7 +85,22 @@ export default function VehiclesPage() {
     finally { setLoading(false); }
   };
 
+  const loadDepartments = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/masters/departments", { headers });
+      setDepartments(res.data.filter(d => d.status === 'active'));
+    } catch (err) { console.error(err); }
+  };
+
+  const loadSections = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/masters/sections", { headers });
+      setSections(res.data);
+    } catch (err) { console.error(err); }
+  };
+
   useEffect(() => { load(); }, [currentPage]);
+  useEffect(() => { loadDepartments(); loadSections(); }, []);
 
   return (
     <div style={{ minHeight: "100vh", background: theme.bg, fontFamily: "'DM Sans', sans-serif" }}>
@@ -140,13 +155,21 @@ export default function VehiclesPage() {
                     <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>DEPARTMENT</label>
                     <select style={select} value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })} required>
                       <option value="" style={{ background: '#1E293B' }}>Select Department</option>
-                      {/* Backend se departments fetch karne ka logic add karna hoga agar abhi nahi hai */}
-                      <option value="1" style={{ background: '#1E293B' }}>Transport</option>
+                      {departments.map(dept => (
+                        <option key={dept.id} value={dept.id} style={{ background: '#1E293B' }}>{dept.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div>
                     <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>SECTION</label>
-                    <input style={input} placeholder="Site A" value={form.section_id} onChange={(e) => setForm({ ...form, section_id: e.target.value })} />
+                    <select style={select} value={form.section_id} onChange={(e) => setForm({ ...form, section_id: e.target.value })}>
+                      <option value="" style={{ background: '#1E293B' }}>Select Section</option>
+                      {sections
+                        .filter(section => !form.department_id || String(section.dept_id) === String(form.department_id))
+                        .map(section => (
+                          <option key={section.id} value={section.id} style={{ background: '#1E293B' }}>{section.section_name}</option>
+                        ))}
+                    </select>
                   </div>
                 </div>
 
@@ -184,7 +207,7 @@ export default function VehiclesPage() {
               <table style={{ width: "100%", borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                    {['Date', 'Vehicle', 'Dept', 'Sec', 'Cap', 'Status', 'Action'].map(h => (
+                    {['Date', 'Vehicle', 'Type', 'Department', 'Section', 'Capacity', 'Status', 'Action'].map(h => (
                       <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
@@ -192,7 +215,7 @@ export default function VehiclesPage() {
                 <tbody>
                   {vehicles.map(item => (
                     <tr key={item.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
-                      <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px' }}>{new Date(item.created_at).toLocaleDateString()}</td>
+                      <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px' }}>{formatDisplayDate(item.created_at)}</td>
                       <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px', fontWeight: 500 }}>{item.reg_no || item.vehicle_id}</td>
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.vehicle_type || '-'}</td>
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.dept_name || '-'}</td>

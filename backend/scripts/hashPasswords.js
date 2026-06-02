@@ -2,7 +2,7 @@
 const db = require("../config/db");
 const bcrypt = require("bcryptjs");
 
-db.query("SELECT id, password FROM users", async (err, users) => {
+db.query("SELECT id, password FROM employees", async (err, users) => {
   if (err) {
     console.error("Fetch error:", err);
     process.exit(1);
@@ -10,7 +10,7 @@ db.query("SELECT id, password FROM users", async (err, users) => {
 
   for (const u of users) {
     // already hashed? (bcrypt hashes usually start with $2a$ or $2b$)
-    if (u.password && (u.password.startsWith("$2a$") || u.password.startsWith("$2b$"))) {
+    if (u.password && (u.password.startsWith("$2a$") || u.password.startsWith("$2b$") || u.password.startsWith("$2y$"))) {
       console.log(`User ${u.id} already hashed, skipping`);
       continue;
     }
@@ -19,7 +19,7 @@ db.query("SELECT id, password FROM users", async (err, users) => {
 
     await new Promise((resolve, reject) => {
       db.query(
-        "UPDATE users SET password = ? WHERE id = ?",
+        "UPDATE employees SET password = ? WHERE id = ?",
         [hashed, u.id],
         (e) => (e ? reject(e) : resolve())
       );

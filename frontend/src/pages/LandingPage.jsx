@@ -1,6 +1,5 @@
 
 
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
@@ -14,10 +13,10 @@ const LandingPage = () => {
     subText: isDark ? '#94A3B8' : '#64748B',
     cardBg: isDark ? 'rgba(15, 23, 42, 0.5)' : 'rgba(255, 255, 255, 0.8)',
     btnAdmin: {
-      background: '#3B82F6', color: '#fff', border: 'none', borderRadius: '12px', padding: '14px 28px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 10px 25px rgba(59,130,246, 0.3)', transition: 'all 0.2s'
+      background: '#3B82F6', color: '#fff', border: 'none', borderRadius: '10px', padding: '11px 22px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', boxShadow: '0 8px 20px rgba(59,130,246, 0.28)', transition: 'all 0.2s'
     },
     btnDept: {
-      background: 'transparent', color: '#3B82F6', border: '2px solid #3B82F6', borderRadius: '12px', padding: '14px 28px', fontSize: '16px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
+      background: 'transparent', color: '#3B82F6', border: '1.5px solid #3B82F6', borderRadius: '10px', padding: '11px 22px', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
     }
   };
 
@@ -26,7 +25,7 @@ const LandingPage = () => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('role');
     if (token && role === 'admin') navigate('/admin');
-    else if (token && role === 'department') navigate('/department');
+    else if (token && role) navigate('/department');
   };
 
   return (
@@ -40,34 +39,34 @@ const LandingPage = () => {
       fontFamily: "'DM Sans', sans-serif",
       padding: '2rem'
     }}>
-      <div style={{ textAlign: 'center', maxWidth: '500px' }}>
+      <div style={{ textAlign: 'center', width: '100%', maxWidth: '380px' }}>
         
         {/* ✅ Logo Section - onClick add kiya */}
         <div
           onClick={handleLogoClick}
           style={{
-            width: '120px', height: '120px',
+            width: '84px', height: '84px',
             background: 'linear-gradient(135deg, #3B82F6, #1D4ED8)',
-            borderRadius: '30px',
+            borderRadius: '22px',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '60px',
-            boxShadow: '0 20px 40px rgba(59,130,246, 0.4)',
-            marginBottom: '2rem',
+            fontSize: '40px',
+            boxShadow: '0 14px 30px rgba(59,130,246, 0.35)',
+            margin: '0 auto 1.35rem',
             cursor: 'pointer'
           }}
         >
           ⛽
         </div>
 
-        <h1 style={{ color: theme.text, fontSize: '42px', fontWeight: 700, margin: 0, letterSpacing: '-1px' }}>
-          Diesel Manager
+        <h1 style={{ color: theme.text, fontSize: '30px', fontWeight: 700, margin: 0, lineHeight: 1.18 }}>
+          Diesel Management System
         </h1>
-        <p style={{ color: theme.subText, fontSize: '18px', marginTop: '8px', marginBottom: '3rem' }}>
-          Fleet Fuel System
+        <p style={{ color: theme.subText, fontSize: '15px', marginTop: '7px', marginBottom: '2rem' }}>
+          Fuel Allocation System
         </p>
 
         {/* Buttons Section */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', width: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '11px', width: '100%' }}>
           <button 
             onClick={() => navigate('/login')}
             style={theme.btnAdmin}

@@ -1,6 +1,6 @@
 
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -83,7 +83,7 @@ const Login = () => {
     const role = localStorage.getItem('role');
     if (token && role === 'admin') {
       navigate('/admin');
-    } else if (token && role === 'department') {
+    } else if (token && role) {
       navigate('/department');
     } else {
       navigate('/');
@@ -139,7 +139,7 @@ const Login = () => {
             onClick={handleLogoClick}
             style={{ color: '#F1F5F9', fontSize: '24px', fontWeight: 600, margin: 0, letterSpacing: '-0.5px' }}
           >
-            Diesel Manager
+            Diesel Management System
           </h1>
           <p style={{ color: '#64748B', fontSize: '13px', marginTop: '4px' }}>
             Vehicle Fuel Management System

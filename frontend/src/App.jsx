@@ -47,8 +47,6 @@ import SectionsPage from './pages/SectionsPage';
 import EmployeesPage from './pages/EmployeesPage';
 import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
-
-// ✅ You already have this page
 import DeptDashboard from './pages/DeptDashboard'; 
 
 function App() {
@@ -60,15 +58,13 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           {/* Admin Routes */}
-          <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="/admin/departments" element={<ProtectedRoute><DepartmentsPage /></ProtectedRoute>} />
-          <Route path="/admin/vehicles" element={<ProtectedRoute><VehiclesPage /></ProtectedRoute>} />
-          <Route path="/admin/employees" element={<ProtectedRoute><EmployeesPage /></ProtectedRoute>} />
-          <Route path="/admin/section" element={<ProtectedRoute><SectionsPage /></ProtectedRoute>} />
-
-          {/* Department/Employee Route */}
-          {/* ✅ FIXED: Using your existing DeptDashboard */}
-          <Route path="/department" element={<ProtectedRoute><DeptDashboard /></ProtectedRoute>} />
+          <Route path="/admin" element={<ProtectedRoute allowedRoles="admin"><AdminDashboard /></ProtectedRoute>} />
+          <Route path="/admin/departments" element={<ProtectedRoute allowedRoles="admin"><DepartmentsPage /></ProtectedRoute>} />
+          <Route path="/admin/vehicles" element={<ProtectedRoute allowedRoles="admin"><VehiclesPage /></ProtectedRoute>} />
+          <Route path="/admin/employees" element={<ProtectedRoute allowedRoles="admin"><EmployeesPage /></ProtectedRoute>} />
+          <Route path="/admin/sections" element={<ProtectedRoute allowedRoles="admin"><SectionsPage /></ProtectedRoute>} />
+          <Route path="/admin/section" element={<Navigate to="/admin/sections" replace />} />
+          <Route path="/department" element={<ProtectedRoute allowedRoles={['department', 'employee']}><DeptDashboard /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

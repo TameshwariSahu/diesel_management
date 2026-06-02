@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import PageHeader from '../components/PageHeader';
 import Pagination from '../components/Pagination';
 import { useTheme } from '../context/ThemeContext';
+import { formatDisplayDate } from '../utils/date';
 
 
 const StatusBadge = ({ status }) => {
@@ -63,7 +64,7 @@ const AdminDashboard = () => {
   useEffect(() => { fetchAll(); }, [currentPage]);
 
   const updateStatus = async (id, status) => {
-    let change_reason = null;
+    let change_reason;
     if (status === 'Rejected') {
       change_reason = window.prompt("Please enter rejection reason:");
       if (change_reason === null) return; 
@@ -123,7 +124,7 @@ const AdminDashboard = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                    {['Date', 'Vehicle', 'Op(KM)', 'Cls(KM)', 'Total (KM)', 'Status', 'Action'].map(h => (
+                    {['Date', 'Vehicle', 'Total (KM)', 'Authorized By', 'Remarks', 'Status', 'Reason', 'Action'].map(h => (
                       <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: theme.subText, fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px' }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
@@ -131,14 +132,17 @@ const AdminDashboard = () => {
                 <tbody>
                   {allocations.map(item => (
                     <tr key={item.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
-                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{new Date(item.allocation_date).toLocaleDateString()}</td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{formatDisplayDate(item.allocation_date)}</td>
                       <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px', fontWeight: 500 }}>{item.reg_no || item.vehicle_id}</td>
-                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.opening_reading || '-'}</td>
-                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.closing_reading || '-'}</td>
                       <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px', fontWeight: 500 }}>
-                        {item.closing_reading && item.opening_reading ? ((Number(item.closing_reading) - Number(item.opening_reading)).toFixed(2)) : '-'}
+                      {(item.opening_reading && item.closing_reading) 
+  ? (parseFloat(item.closing_reading) - parseFloat(item.opening_reading)).toFixed(2) 
+  : '-'}  {/* {item.closing_reading && item.opening_reading ? ((Number(item.closing_reading) - Number(item.opening_reading)).toFixed(2)) : '-'} */}
                       </td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.authorized_by || '-'}</td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.remarks || '-'}</td>
                       <td style={{ padding: '12px 16px' }}><StatusBadge status={item.status} /></td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.change_reason || '-'}</td>
                       <td style={{ padding: '12px 16px' }}>
                         {item.status === 'Pending' && (
                           <div style={{ display: 'flex', gap: '6px' }}>

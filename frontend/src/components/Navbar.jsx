@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
@@ -12,7 +11,7 @@ const Navbar = ({ user, onLogout, deptName }) => {
     const role = localStorage.getItem('role');
     if (role === 'admin') {
       navigate('/admin');
-    } else if (role === 'department') {
+    } else if (role) {
       navigate('/department');
     } else {
       navigate('/');
@@ -51,16 +50,16 @@ const Navbar = ({ user, onLogout, deptName }) => {
         }}>⛽</div>
         <div>
           <div style={{ color: '#F1F5F9', fontWeight: 600, fontSize: '15px', letterSpacing: '-0.3px' }}>
-            Diesel Manager
+            Diesel Management System
           </div>
-          <div style={{ color: '#64748B', fontSize: '11px' }}>Fleet Fuel System</div>
+          <div style={{ color: '#64748B', fontSize: '11px' }}>Fuel Allocation System</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <div style={{ textAlign: 'right' }}>
           <div style={{ color: '#F1F5F9', fontSize: '13px', fontWeight: 500 }}>
-            {user?.full_name || user?.username}
+            {user?.name || user?.full_name || user?.username}
           </div>
           <div style={{ color: '#3B82F6', fontSize: '11px', textTransform: 'capitalize' }}>
             {user?.role === 'admin' ? 'Administrator' : (deptName || 'Department')}

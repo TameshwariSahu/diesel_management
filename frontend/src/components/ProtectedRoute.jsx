@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const ProtectedRoute = ({ children }) => {
+const ProtectedRoute = ({ children, allowedRoles }) => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [isValid, setIsValid] = useState(false);
@@ -18,9 +18,17 @@ const ProtectedRoute = ({ children }) => {
 
       try {
         // Call a backend route to verify the token is still valid
-        await axios.get('http://localhost:5000/api/auth/verify', {
+        const res = await axios.get('http://localhost:5000/api/auth/verify', {
           headers: { Authorization: `Bearer ${token}` }
         });
+
+        const userRole = res.data?.user?.role;
+        const roles = Array.isArray(allowedRoles) ? allowedRoles : allowedRoles ? [allowedRoles] : [];
+        if (roles.length > 0 && !roles.includes(userRole)) {
+          navigate(userRole === 'admin' ? '/admin' : '/department');
+          return;
+        }
+
         setIsValid(true); // Token is good
       } catch (error) {
         console.error("Session invalid:", error);
@@ -32,7 +40,7 @@ const ProtectedRoute = ({ children }) => {
     };
 
     checkSession();
-  }, [navigate]);
+  }, [navigate, allowedRoles]);
 
   if (loading) {
     return (
