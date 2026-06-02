@@ -154,7 +154,12 @@ export default function VehiclesPage() {
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
                     <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>DEPARTMENT</label>
-                    <select style={select} value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })} required>
+                    <select
+                      style={select}
+                      value={form.department_id}
+                      onChange={(e) => setForm({ ...form, department_id: e.target.value, section_id: "" })}
+                      required
+                    >
                       <option value="" style={optionStyle}>Select Department</option>
                       {departments.map(dept => (
                         <option key={dept.id} value={dept.id} style={optionStyle}>{dept.name}</option>
@@ -163,10 +168,17 @@ export default function VehiclesPage() {
                   </div>
                   <div>
                     <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>SECTION</label>
-                    <select style={select} value={form.section_id} onChange={(e) => setForm({ ...form, section_id: e.target.value })}>
-                      <option value="" style={optionStyle}>Select Section</option>
+                    <select
+                      style={{ ...select, opacity: form.department_id ? 1 : 0.65 }}
+                      value={form.section_id}
+                      onChange={(e) => setForm({ ...form, section_id: e.target.value })}
+                      disabled={!form.department_id}
+                    >
+                      <option value="" style={optionStyle}>
+                        {form.department_id ? "Select Section" : "Select Department First"}
+                      </option>
                       {sections
-                        .filter(section => !form.department_id || String(section.dept_id) === String(form.department_id))
+                        .filter(section => String(section.dept_id) === String(form.department_id))
                         .map(section => (
                           <option key={section.id} value={section.id} style={optionStyle}>{section.section_name}</option>
                         ))}
@@ -208,7 +220,7 @@ export default function VehiclesPage() {
               <table style={{ width: "100%", borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                    {['Date', 'Vehicle', 'Type', 'Department', 'Section', 'Capacity', 'Status', 'Action'].map(h => (
+                    {['Date', 'Vehicle', 'Type', 'Department', 'Section', 'Driver', 'Capacity', 'Status', 'Action'].map(h => (
                       <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
@@ -221,6 +233,7 @@ export default function VehiclesPage() {
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.vehicle_type || '-'}</td>
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.dept_name || '-'}</td>
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.section_name || '-'}</td>
+                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.driver_name || '-'}</td>
                       <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px' }}>{item.tank_capacity || '-'}</td>
                       <td style={{ padding: '12px 16px' }}><StatusBadge status={item.status} /></td>
                       <td style={{ padding: '12px 16px' }}>

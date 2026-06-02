@@ -464,7 +464,7 @@ export default function EmployeesPage() {
   const [departments, setDepartments] = useState([]);
   const [sections, setSections] = useState([]);
   
-  const [form, setForm] = useState({ 
+  const emptyForm = {
     name: "", 
     sapId: "", 
     password: "", 
@@ -472,7 +472,9 @@ export default function EmployeesPage() {
     deptId: "", 
     sectionId: "", 
     contact: "" 
-  });
+  };
+  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState(null);
 
   // ✅ Toast State
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
@@ -529,7 +531,7 @@ export default function EmployeesPage() {
     setForm({ ...form, name: formattedName });
   };
 
-  const addEmployee = async (e) => {
+  const saveEmployee = async (e) => {
     e.preventDefault();
     
     if (form.sapId.length !== 7) {
@@ -543,15 +545,41 @@ export default function EmployeesPage() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/masters/employees", form, { headers });
-      setToast({ show: true, message: "Employee added successfully!", type: "success" });
-      setForm({ name: "", sapId: "", password: "", role: "employee", deptId: "", sectionId: "", contact: "" });
+      if (editingId) {
+        await axios.put(`http://localhost:5000/api/masters/employees/${editingId}`, form, { headers });
+        setToast({ show: true, message: "Employee updated successfully!", type: "success" });
+      } else {
+        await axios.post("http://localhost:5000/api/masters/employees", form, { headers });
+        setToast({ show: true, message: "Employee added successfully!", type: "success" });
+      }
+
+      setForm(emptyForm);
+      setEditingId(null);
       load();
       
       setTimeout(() => setToast({ show: false, message: '' }), 3000);
     } catch (err) {
-      setToast({ show: true, message: err.response?.data?.message || "Error adding employee", type: "error" });
+      setToast({ show: true, message: err.response?.data?.message || "Error saving employee", type: "error" });
     }
+  };
+
+  const editEmployee = (employee) => {
+    setEditingId(employee.id);
+    setForm({
+      name: employee.name || "",
+      sapId: employee.sap_id || "",
+      password: "",
+      role: employee.role || "employee",
+      deptId: employee.dept_id ? String(employee.dept_id) : "",
+      sectionId: employee.section_id ? String(employee.section_id) : "",
+      contact: employee.contact || "",
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm(emptyForm);
   };
 
   const toggleStatus = async (id, currentStatus) => {
@@ -606,7 +634,7 @@ export default function EmployeesPage() {
           marginBottom: "20px",
           boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
         }}>
-          <form onSubmit={addEmployee} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 15, alignItems: "center" }}>
+          <form onSubmit={saveEmployee} style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 15, alignItems: "center" }}>
             
             <input 
               style={input} 
@@ -635,26 +663,38 @@ export default function EmployeesPage() {
                   autoComplete="new-password" 
                   style={input}
                   type="password"
-                  placeholder="Password"
+                  placeholder={editingId ? "New Password (optional)" : "Password"}
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  required
+                  required={!editingId}
                 />
             <select style={select} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} required>
               <option value="employee" style={optionStyle}>Employee</option>
               <option value="admin" style={optionStyle}>Admin</option>
             </select>
 
-            <select style={select} value={form.deptId} onChange={(e) => setForm({ ...form, deptId: e.target.value })} required>
+            <select
+              style={select}
+              value={form.deptId}
+              onChange={(e) => setForm({ ...form, deptId: e.target.value, sectionId: "" })}
+              required
+            >
               <option value="" style={optionStyle}>Select Department</option>
               {departments.map(d => (
                 <option key={d.id} value={d.id} style={optionStyle}>{d.name}</option>
               ))}
             </select>
 
-            <select style={select} value={form.sectionId} onChange={(e) => setForm({ ...form, sectionId: e.target.value })}>
-              <option value="" style={optionStyle}>Select Section</option>
-              {sections.map(s => (
+            <select
+              style={{ ...select, opacity: form.deptId ? 1 : 0.65 }}
+              value={form.sectionId}
+              onChange={(e) => setForm({ ...form, sectionId: e.target.value })}
+              disabled={!form.deptId}
+            >
+              <option value="" style={optionStyle}>
+                {form.deptId ? "Select Section" : "Select Department First"}
+              </option>
+              {sections.filter(s => String(s.dept_id) === String(form.deptId)).map(s => (
                 <option key={s.id} value={s.id} style={optionStyle}>{s.section_name}</option>
               ))}
             </select>
@@ -671,7 +711,19 @@ export default function EmployeesPage() {
               fontWeight: 600, 
               height: "44px", 
               boxShadow: "0 4px 12px rgba(59,130,246,0.3)" 
-            }}>+ Add Employee</button>
+            }}>{editingId ? "Save Employee" : "+ Add Employee"}</button>
+            {editingId && (
+              <button type="button" onClick={cancelEdit} style={{ 
+                background: "rgba(100,116,139,0.12)", 
+                color: theme.subText, 
+                border: `1px solid ${theme.border}`, 
+                borderRadius: 8, 
+                padding: "10px 20px", 
+                cursor: "pointer", 
+                fontWeight: 600, 
+                height: "44px" 
+              }}>Cancel</button>
+            )}
           </form>
         </div>
 
@@ -680,14 +732,14 @@ export default function EmployeesPage() {
           <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                <th style={{ width: "14%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>NAME</th>
+                <th style={{ width: "13%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>NAME</th>
                 <th style={{ width: "10%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>SAP ID</th>
                 <th style={{ width: "10%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>ROLE</th>
-                <th style={{ width: "18%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>DEPARTMENT</th>
-                <th style={{ width: "16%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>SECTION</th>
-                <th style={{ width: "14%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>CONTACT</th>
+                <th style={{ width: "16%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>DEPARTMENT</th>
+                <th style={{ width: "14%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>SECTION</th>
+                <th style={{ width: "12%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>CONTACT</th>
                 <th style={{ width: "8%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>STATUS</th>
-                <th style={{ width: "10%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>ACTION</th>
+                <th style={{ width: "17%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>ACTION</th>
               </tr>
             </thead>
             <tbody>
@@ -701,23 +753,42 @@ export default function EmployeesPage() {
                   <td style={{ padding: "12px 16px", color: theme.subText, fontSize: "13px" }}>{v.contact || "-"}</td>
                   <td style={{ padding: "12px 16px", color: v.status === "active" ? "#34D399" : "#F87171", fontSize: "13px", fontWeight: 600 }}>{v.status}</td>
                   <td style={{ padding: "12px 16px" }}>
-                    <button
-                      type="button"
-                      onClick={() => toggleStatus(v.id, v.status)}
-                      style={{
-                        background: v.status === "active" ? "rgba(239, 68, 68, 0.1)" : "rgba(16, 185, 129, 0.1)",
-                        color: v.status === "active" ? "#F87171" : "#34D399",
-                        border: `1px solid ${v.status === "active" ? "rgba(239, 68, 68, 0.35)" : "rgba(16, 185, 129, 0.35)"}`,
-                        borderRadius: 6,
-                        padding: "6px 8px",
-                        cursor: "pointer",
-                        fontSize: 12,
-                        fontWeight: 600,
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {v.status === "active" ? "Deactivate" : "Activate"}
-                    </button>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button
+                        type="button"
+                        onClick={() => editEmployee(v)}
+                        style={{
+                          background: "rgba(59, 130, 246, 0.1)",
+                          color: "#3B82F6",
+                          border: "1px solid rgba(59, 130, 246, 0.3)",
+                          borderRadius: 6,
+                          padding: "6px 8px",
+                          cursor: "pointer",
+                          fontSize: 12,
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleStatus(v.id, v.status)}
+                        style={{
+                          background: v.status === "active" ? "rgba(239, 68, 68, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                          color: v.status === "active" ? "#F87171" : "#34D399",
+                          border: `1px solid ${v.status === "active" ? "rgba(239, 68, 68, 0.35)" : "rgba(16, 185, 129, 0.35)"}`,
+                          borderRadius: 6,
+                          padding: "6px 8px",
+                          cursor: "pointer",
+                          fontSize: 12,
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {v.status === "active" ? "Deactivate" : "Activate"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

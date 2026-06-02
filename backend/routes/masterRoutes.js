@@ -6,8 +6,10 @@ const {
   getUsers, 
   addVehicle, 
   addDepartment,
+  updateDepartment,
   getEmployees,
   addEmployee,
+  updateEmployee,
   getSections,
   addSection,
   updateSectionStatus,
@@ -31,7 +33,9 @@ router.post('/departments', verifyToken, isAdmin, addDepartment);
 router.post('/employees', verifyToken, isAdmin, addEmployee);
 router.post('/sections', verifyToken, isAdmin, addSection);
 
-// ✅ UPDATE STATUS ROUTES (Department & Vehicle)
+// UPDATE Routes
+router.put('/departments/:id', verifyToken, isAdmin, updateDepartment);
+router.put('/employees/:id', verifyToken, isAdmin, updateEmployee);
 router.put('/departments/:id/status', verifyToken, isAdmin, updateDepartmentStatus);
 router.put('/vehicles/:id/status', verifyToken, isAdmin, updateVehicleStatus);
 router.put('/employees/:id/status', verifyToken, isAdmin, updateEmployeeStatus);

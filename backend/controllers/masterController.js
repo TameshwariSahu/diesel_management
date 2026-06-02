@@ -2,6 +2,21 @@ const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const { toTitleCase, normalizeRegNo } = require('../utils/formatters');
 
+const resolveEmployeeId = (employeeId, callback) => {
+  if (!employeeId) return callback(null, null);
+
+  if (!/^\d+$/.test(String(employeeId))) {
+    return callback({ status: 400, message: "Incharge employee ID must be numeric." });
+  }
+
+  db.query("SELECT id FROM employees WHERE id = ?", [employeeId], (err, results) => {
+    if (err) return callback({ status: 500, message: "Database error checking incharge." });
+    if (results.length === 0) return callback({ status: 400, message: "Incharge employee ID not found." });
+
+    callback(null, Number(employeeId));
+  });
+};
+
 // exports.getDepartments = (req, res) => {
 //   const sql = `
 //     SELECT d.*, e.name as incharge_name 
@@ -17,7 +32,8 @@ const { toTitleCase, normalizeRegNo } = require('../utils/formatters');
 // };
 exports.getDepartments = (req, res) => {
   const sql = `
-    SELECT d.id, d.name, d.contact, d.status, d.incharge_id, e.name as incharge_name 
+    SELECT d.id, d.name, d.contact, d.status, d.incharge_id, d.incharge_name as custom_incharge_name,
+           COALESCE(d.incharge_name, e.name) as incharge_name
     FROM departments d
     LEFT JOIN employees e ON d.incharge_id = e.id
     ORDER BY d.name ASC
@@ -198,6 +214,11 @@ exports.updateEmployeeStatus = (req, res) => {
 exports.addDepartment = (req, res) => {
   const { dept_name, contact, incharge_id, incharge_name, status } = req.body;
   const cleanDeptName = toTitleCase(dept_name);
+  const cleanInchargeName = toTitleCase(incharge_name);
+
+  if (!cleanDeptName) {
+    return res.status(400).json({ message: "Department name is required." });
+  }
 
   if (contact && !/^\d{10}$/.test(contact)) {
     return res.status(400).json({ message: "Contact number must be exactly 10 digits." });
@@ -216,14 +237,15 @@ exports.addDepartment = (req, res) => {
     }
 
     const sql = `
-      INSERT INTO departments (name, contact, incharge_id, status)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO departments (name, contact, incharge_id, incharge_name, status)
+      VALUES (?, ?, ?, ?, ?)
     `;
 
     const params = [
       cleanDeptName,
       contact || null,
-      incharge_id || incharge_name || null,
+      incharge_id || null,
+      cleanInchargeName || null,
       status || 'active'
     ];
 
@@ -233,6 +255,49 @@ exports.addDepartment = (req, res) => {
         return res.status(500).json({ message: "Error adding department" });
       }
       res.json({ message: "Department added successfully", id: result.insertId });
+    });
+  });
+};
+
+exports.updateDepartment = (req, res) => {
+  const { dept_name, contact, incharge_name } = req.body;
+  const { id } = req.params;
+  const cleanDeptName = toTitleCase(dept_name);
+  const cleanInchargeName = toTitleCase(incharge_name);
+
+  if (!cleanDeptName) {
+    return res.status(400).json({ message: "Department name is required." });
+  }
+
+  if (contact && !/^\d{10}$/.test(contact)) {
+    return res.status(400).json({ message: "Contact number must be exactly 10 digits." });
+  }
+
+  const checkSql = "SELECT id FROM departments WHERE LOWER(name) = LOWER(?) AND id <> ?";
+
+  db.query(checkSql, [cleanDeptName, id], (err, existing) => {
+    if (err) {
+      console.error("Department Update Check Error:", err);
+      return res.status(500).json({ message: "Database error checking department" });
+    }
+
+    if (existing.length > 0) {
+      return res.status(400).json({ message: "Department already exists." });
+    }
+
+    const sql = "UPDATE departments SET name = ?, contact = ?, incharge_id = NULL, incharge_name = ? WHERE id = ?";
+
+    db.query(sql, [cleanDeptName, contact || null, cleanInchargeName || null, id], (err, result) => {
+      if (err) {
+        console.error("Department Update Error:", err);
+        return res.status(500).json({ message: "Error updating department" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Department not found." });
+      }
+
+      res.json({ message: "Department updated successfully" });
     });
   });
 };
@@ -314,13 +379,70 @@ exports.addEmployee = (req, res) => {
   });
 };
 
+exports.updateEmployee = (req, res) => {
+  const { name, sapId, password, role, deptId, sectionId, contact } = req.body;
+  const { id } = req.params;
+  const cleanName = toTitleCase(name);
+
+  if (!cleanName) {
+    return res.status(400).json({ message: "Employee name is required." });
+  }
+
+  if (!/^\d{7}$/.test(sapId)) {
+    return res.status(400).json({ message: "SAP ID must be exactly 7 digits." });
+  }
+
+  if (!['admin', 'employee'].includes(role)) {
+    return res.status(400).json({ message: "Invalid employee role." });
+  }
+
+  if (contact && !/^\d{10}$/.test(contact)) {
+    return res.status(400).json({ message: "Contact number must be exactly 10 digits." });
+  }
+
+  const checkSql = "SELECT id FROM employees WHERE sap_id = ? AND id <> ?";
+
+  db.query(checkSql, [sapId, id], (err, results) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    if (results.length > 0) {
+      return res.status(400).json({ message: "SAP ID already exists." });
+    }
+
+    const params = [cleanName, sapId, role, deptId || null, sectionId || null, contact || null];
+    let updateSql = `
+      UPDATE employees
+      SET name = ?, sap_id = ?, role = ?, dept_id = ?, section_id = ?, contact = ?
+    `;
+
+    if (password) {
+      updateSql += ", password = ?";
+      params.push(bcrypt.hashSync(password, 10));
+    }
+
+    updateSql += " WHERE id = ?";
+    params.push(id);
+
+    db.query(updateSql, params, (err, result) => {
+      if (err) return res.status(500).json({ error: err.message });
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Employee not found." });
+      }
+
+      res.json({ message: "Employee updated successfully" });
+    });
+  });
+};
+
 
 // --- DEPARTMENTS ---
 
 // Get Departments (Used to populate dropdowns)
 exports.getDepartments = (req, res) => {
   const sql = `
-    SELECT d.id, d.name, d.contact, d.status, d.incharge_id, e.name as incharge_name 
+    SELECT d.id, d.name, d.contact, d.status, d.incharge_id, d.incharge_name as custom_incharge_name,
+           COALESCE(d.incharge_name, e.name) as incharge_name
     FROM departments d
     LEFT JOIN employees e ON d.incharge_id = e.id
     ORDER BY d.name ASC

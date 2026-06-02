@@ -20,39 +20,35 @@ export default function DepartmentsPage() {
     boxSizing: "border-box",
     textTransform: 'capitalize',
   };
-  const optionStyle = { background: isDark ? '#1E293B' : '#FFFFFF', color: theme.text };
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
+  const optionStyle = { background: isDark ? '#1E293B' : '#FFFFFF', color: theme.text };
 
   const [departments, setDepartments] = useState([]);
-  const [users, setUsers] = useState([]); 
-   const [showCustomIncharge, setShowCustomIncharge] = useState(false);
   
-  const [form, setForm] = useState({ dept_name: "", incharge_id: "", contact: "" });
+  const emptyForm = { dept_name: "", incharge_name: "", contact: "" };
+  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState(null);
+  const [showNewIncharge, setShowNewIncharge] = useState(false);
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const totalPages = Math.ceil(departments.length / itemsPerPage);
   const currentData = departments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const savedIncharges = [...new Set(
+    departments
+      .map(dept => dept.incharge_name)
+      .filter(name => name && name.trim())
+  )];
 
   const load = async () => {
     const res = await axios.get("http://localhost:5000/api/masters/departments", { headers });
     setDepartments(res.data);
   };
 
-  const loadUsers = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/masters/users", { headers });
-      setUsers(res.data);
-    } catch (err) {
-      console.error("Error fetching users:", err);
-    }
-  };
-
   useEffect(() => { 
     load(); 
-    loadUsers(); 
   }, []);
 
   // const addDepartment = async (e) => {
@@ -66,27 +62,53 @@ export default function DepartmentsPage() {
   //   load();
   // };
   // Inside DepartmentsPage.jsx
-const addDepartment = async (e) => {
+const saveDepartment = async (e) => {
   e.preventDefault();
   try {
-    await axios.post("http://localhost:5000/api/masters/departments", {
+    const payload = {
       dept_name: form.dept_name,
       contact: form.contact,
-      incharge_id: form.incharge_id,
+      incharge_name: form.incharge_name,
       status: 'active'
-    }, { headers });
-    alert("Department added successfully!");
-    setForm({ dept_name: "", incharge_id: "", contact: "" });
-    setShowCustomIncharge(false);
+    };
+
+    if (editingId) {
+      await axios.put(`http://localhost:5000/api/masters/departments/${editingId}`, payload, { headers });
+      alert("Department updated successfully!");
+    } else {
+      await axios.post("http://localhost:5000/api/masters/departments", payload, { headers });
+      alert("Department added successfully!");
+    }
+
+    setForm(emptyForm);
+    setEditingId(null);
+    setShowNewIncharge(false);
     load();
   } catch (err) {
-    alert(err.response?.data?.message || "Error adding department");
+    alert(err.response?.data?.message || "Error saving department");
   }
 };
 
   const toggleStatus = async (id, currentStatus) => {
     await axios.put(`http://localhost:5000/api/masters/departments/${id}/status`, { status: currentStatus === "active" ? "inactive" : "active" }, { headers });
     load();
+  };
+
+  const editDepartment = (department) => {
+    setEditingId(department.id);
+    setForm({
+      dept_name: department.name || "",
+      incharge_name: department.incharge_name || "",
+      contact: department.contact || "",
+    });
+    setShowNewIncharge(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm(emptyForm);
+    setShowNewIncharge(false);
   };
 
   return (
@@ -97,55 +119,55 @@ const addDepartment = async (e) => {
         
         <PageHeader title="Department Management" subtitle="Admin can add/activate/deactivate departments" />
 
-              <form onSubmit={addDepartment} style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr 1fr auto", gap: 10, margin: "16px 0" }}>
+              <form onSubmit={saveDepartment} style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr 1fr auto auto", gap: 10, margin: "16px 0" }}>
           <input style={input} placeholder="Department name" value={form.dept_name} onChange={(e) => setForm({ ...form, dept_name: e.target.value })} required />
-                   {!showCustomIncharge ? (
-            <select 
-              style={input} 
-              value={form.incharge_id} 
-              onChange={(e) => {
-                if (e.target.value === 'custom') {
-                  setShowCustomIncharge(true);
-                  setForm({ ...form, incharge_id: "" });
-                } else {
-                  setForm({ ...form, incharge_id: e.target.value });
-                }
-              }} 
-              required
-            >
-              <option value="" style={optionStyle}>Select Incharge</option>
-             {users.map(u => (
-                <option key={u.id} value={u.id} style={optionStyle}>
-                  ID: {u.id} - {u.name}
-                </option>
-              ))}
-              <option value="custom" style={{ ...optionStyle, color: '#F59E0B' }}>➕ Enter Custom ID</option>
-            </select>
-                 ) : (
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <input 
-                style={input} 
-                placeholder="Employee ID" 
-                value={form.incharge_id} 
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (/^\d*$/.test(val)) {
-                    setForm({ ...form, incharge_id: val });
-                  }
-                }} 
-                required 
+          {showNewIncharge ? (
+            <div style={{ display: "flex", gap: 5 }}>
+              <input
+                style={input}
+                placeholder="New incharge name"
+                value={form.incharge_name}
+                onChange={(e) => setForm({ ...form, incharge_name: e.target.value })}
               />
-              <button 
-                type="button" 
-                onClick={() => { setShowCustomIncharge(false); setForm({ ...form, incharge_id: "" }); }}
+              <button
+                type="button"
+                onClick={() => { setShowNewIncharge(false); setForm({ ...form, incharge_name: "" }); }}
+                title="Back to saved incharges"
                 style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#F87171', borderRadius: 10, padding: '0 10px', cursor: 'pointer', fontSize: '16px' }}
-                title="Back to Dropdown"
-              >✕</button>
+              >
+                ✕
+              </button>
             </div>
+          ) : (
+            <select
+              style={input}
+              value={form.incharge_name}
+              onChange={(e) => {
+                if (e.target.value === "__new__") {
+                  setShowNewIncharge(true);
+                  setForm({ ...form, incharge_name: "" });
+                  return;
+                }
+                setForm({ ...form, incharge_name: e.target.value });
+              }}
+            >
+              <option value="" style={optionStyle}>No Incharge / Select Saved</option>
+              {savedIncharges.map(name => (
+                <option key={name} value={name} style={optionStyle}>{name}</option>
+              ))}
+              <option value="__new__" style={{ ...optionStyle, color: '#F59E0B' }}>+ Add New Incharge</option>
+            </select>
           )}
 
           <input style={input} type="tel" maxLength={10} placeholder="Contact" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value.replace(/[^0-9]/g, '') })} /> 
-          <button type="submit" style={{ background: "#3B82F6", color: "#fff", border: "none", borderRadius: 10, padding: "10px 14px", cursor: "pointer", fontWeight: 600 }}>+ Add</button>
+          <button type="submit" style={{ background: "#3B82F6", color: "#fff", border: "none", borderRadius: 10, padding: "10px 14px", cursor: "pointer", fontWeight: 600 }}>
+            {editingId ? "Save" : "+ Add"}
+          </button>
+          {editingId && (
+            <button type="button" onClick={cancelEdit} style={{ background: "rgba(100,116,139,0.12)", color: theme.subText, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "10px 14px", cursor: "pointer", fontWeight: 600 }}>
+              Cancel
+            </button>
+          )}
         </form>
 
         <div style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: 16, overflow: "hidden" }}>
@@ -165,9 +187,14 @@ const addDepartment = async (e) => {
                   <td style={{ padding: "12px 16px", color: theme.subText, fontSize: "13px" }}>{v.contact || "-"}</td>
                   <td style={{ padding: "12px 16px", color: v.status === "active" ? "#34D399" : "#F87171", fontSize: "13px", fontWeight: 600 }}>{v.status}</td>
                   <td style={{ padding: "12px 16px" }}>
-                    <button onClick={() => toggleStatus(v.id, v.status)} style={{ background: v.status === "active" ? "rgba(239,68,68,0.1)" : "rgba(16,185,129,0.1)", border: `1px solid ${theme.border}`, color: v.status === "active" ? "#F87171" : "#34D399", borderRadius: 10, padding: "6px 10px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}>
-                      {v.status === "active" ? "Deactivate" : "Activate"}
-                    </button>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      <button onClick={() => editDepartment(v)} style={{ background: "rgba(59,130,246,0.1)", border: "1px solid rgba(59,130,246,0.25)", color: "#3B82F6", borderRadius: 10, padding: "6px 10px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}>
+                        Edit
+                      </button>
+                      <button onClick={() => toggleStatus(v.id, v.status)} style={{ background: v.status === "active" ? "rgba(239,68,68,0.1)" : "rgba(16,185,129,0.1)", border: `1px solid ${theme.border}`, color: v.status === "active" ? "#F87171" : "#34D399", borderRadius: 10, padding: "6px 10px", cursor: "pointer", fontWeight: 600, fontSize: 12 }}>
+                        {v.status === "active" ? "Deactivate" : "Activate"}
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
