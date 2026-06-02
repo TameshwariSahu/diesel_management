@@ -6,21 +6,21 @@ import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
 import { useTheme } from '../context/ThemeContext';
 
-const input = {
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: "10px",
-  padding: "10px 12px",
-  color: "#F1F5F9",
-  fontSize: "13px",
-  width: "100%",
-  boxSizing: "border-box",
-  textTransform: 'capitalize',
-};
-
 export default function DepartmentsPage() {
   const { isDark } = useTheme();
   const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#475569' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
+  const input = {
+    background: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
+    border: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(15,23,42,0.12)",
+    borderRadius: "10px",
+    padding: "10px 12px",
+    color: theme.text,
+    fontSize: "13px",
+    width: "100%",
+    boxSizing: "border-box",
+    textTransform: 'capitalize',
+  };
+  const optionStyle = { background: isDark ? '#1E293B' : '#FFFFFF', color: theme.text };
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
@@ -113,13 +113,13 @@ const addDepartment = async (e) => {
               }} 
               required
             >
-              <option value="" style={{ background: '#1E293B' }}>Select Incharge</option>
+              <option value="" style={optionStyle}>Select Incharge</option>
              {users.map(u => (
-                <option key={u.id} value={u.id} style={{ background: '#1E293B' }}>
+                <option key={u.id} value={u.id} style={optionStyle}>
                   ID: {u.id} - {u.name}
                 </option>
               ))}
-              <option value="custom" style={{ background: '#1E293B', color: '#F59E0B' }}>➕ Enter Custom ID</option>
+              <option value="custom" style={{ ...optionStyle, color: '#F59E0B' }}>➕ Enter Custom ID</option>
             </select>
                  ) : (
             <div style={{ display: 'flex', gap: '5px' }}>

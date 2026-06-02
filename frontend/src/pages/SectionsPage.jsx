@@ -114,20 +114,6 @@ import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import { useTheme } from '../context/ThemeContext';
 
-const input = {
-  background: "#080C18",
-  border: "1px solid rgba(255,255,255,0.05)",
-  borderRadius: "8px",
-  padding: "10px 14px",
-  color: "#F1F5F9",
-  fontSize: "14px",
-  width: "100%",
-  height: "44px",
-  boxSizing: "border-box",
-};
-
-const select = { ...input, cursor: "pointer" };
-
 export default function SectionsPage() {
   const { isDark } = useTheme();
   const theme = { 
@@ -137,6 +123,19 @@ export default function SectionsPage() {
     subText: isDark ? '#94A3B8' : '#64748B', 
     border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' 
   };
+  const input = {
+    background: isDark ? "#080C18" : "#FFFFFF",
+    border: isDark ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(15,23,42,0.12)",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    color: theme.text,
+    fontSize: "14px",
+    width: "100%",
+    height: "44px",
+    boxSizing: "border-box",
+  };
+  const select = { ...input, cursor: "pointer" };
+  const optionStyle = { background: isDark ? '#1E293B' : '#FFFFFF', color: theme.text };
   
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
@@ -211,9 +210,9 @@ export default function SectionsPage() {
               onChange={(e) => setForm({ ...form, dept_id: e.target.value })} 
               required
             >
-              <option value="" style={{ background: '#1E293B' }}>Select Department</option>
+              <option value="" style={optionStyle}>Select Department</option>
               {departments.map(dept => (
-                <option key={dept.id} value={dept.id} style={{ background: '#1E293B' }}>
+                <option key={dept.id} value={dept.id} style={optionStyle}>
                   {dept.name}
                 </option>
               ))}

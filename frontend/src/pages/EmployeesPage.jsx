@@ -406,25 +406,6 @@ import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
 import { useTheme } from '../context/ThemeContext';
 
-const input = {
-  background: "#080C18",
-  border: "1px solid rgba(255,255,255,0.05)",
-  borderRadius: "8px",
-  padding: "10px 14px",
-  color: "#F1F5F9",
-  fontSize: "14px",
-  width: "100%",
-  height: "44px",
-  boxSizing: "border-box",
-  outline: "none",
-  transition: "all 0.15s",
-};
-
-const select = {
-  ...input,
-  cursor: "pointer",
-};
-
 // ✅ TOAST NOTIFICATION COMPONENT
 const Toast = ({ message, type, onClose }) => {
   if (!message) return null;
@@ -457,6 +438,24 @@ const Toast = ({ message, type, onClose }) => {
 export default function EmployeesPage() {
   const { isDark } = useTheme();
   const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#94A3B8' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
+  const input = {
+    background: isDark ? "#080C18" : "#FFFFFF",
+    border: isDark ? "1px solid rgba(255,255,255,0.05)" : "1px solid rgba(15,23,42,0.12)",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    color: theme.text,
+    fontSize: "14px",
+    width: "100%",
+    height: "44px",
+    boxSizing: "border-box",
+    outline: "none",
+    transition: "all 0.15s",
+  };
+  const select = {
+    ...input,
+    cursor: "pointer",
+  };
+  const optionStyle = { background: isDark ? '#1E293B' : '#FFFFFF', color: theme.text };
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
@@ -555,14 +554,36 @@ export default function EmployeesPage() {
     }
   };
 
+  const toggleStatus = async (id, currentStatus) => {
+    const nextStatus = currentStatus === "active" ? "inactive" : "active";
+
+    try {
+      await axios.put(
+        `http://localhost:5000/api/masters/employees/${id}/status`,
+        { status: nextStatus },
+        { headers }
+      );
+      setToast({
+        show: true,
+        message: `Employee ${nextStatus === "active" ? "activated" : "deactivated"} successfully!`,
+        type: "success",
+      });
+      load();
+      setTimeout(() => setToast({ show: false, message: '' }), 3000);
+    } catch (err) {
+      setToast({ show: true, message: err.response?.data?.message || "Error updating employee status", type: "error" });
+    }
+  };
+
   return (
     <div style={{ minHeight: "100vh", background: theme.bg, fontFamily: "'DM Sans', sans-serif" }}>
 
       <style>
         {`
           input.no-autofill {
-            background-color: #080C18 !important; 
-            -webkit-box-shadow: 0 0 0px 1000px #080C18 inset !important;
+            background-color: ${isDark ? '#080C18' : '#FFFFFF'} !important; 
+            -webkit-box-shadow: 0 0 0px 1000px ${isDark ? '#080C18' : '#FFFFFF'} inset !important;
+            -webkit-text-fill-color: ${theme.text} !important;
             transition: background-color 5000s ease-in-out 0s;
           }
         `}
@@ -620,21 +641,21 @@ export default function EmployeesPage() {
                   required
                 />
             <select style={select} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} required>
-              <option value="employee" style={{ background: '#1E293B' }}>Employee</option>
-              <option value="admin" style={{ background: '#1E293B' }}>Admin</option>
+              <option value="employee" style={optionStyle}>Employee</option>
+              <option value="admin" style={optionStyle}>Admin</option>
             </select>
 
             <select style={select} value={form.deptId} onChange={(e) => setForm({ ...form, deptId: e.target.value })} required>
-              <option value="" style={{ background: '#1E293B' }}>Select Department</option>
+              <option value="" style={optionStyle}>Select Department</option>
               {departments.map(d => (
-                <option key={d.id} value={d.id} style={{ background: '#1E293B' }}>{d.name}</option>
+                <option key={d.id} value={d.id} style={optionStyle}>{d.name}</option>
               ))}
             </select>
 
             <select style={select} value={form.sectionId} onChange={(e) => setForm({ ...form, sectionId: e.target.value })}>
-              <option value="" style={{ background: '#1E293B' }}>Select Section</option>
+              <option value="" style={optionStyle}>Select Section</option>
               {sections.map(s => (
-                <option key={s.id} value={s.id} style={{ background: '#1E293B' }}>{s.section_name}</option>
+                <option key={s.id} value={s.id} style={optionStyle}>{s.section_name}</option>
               ))}
             </select>
 
@@ -659,13 +680,14 @@ export default function EmployeesPage() {
           <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
             <thead>
               <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                <th style={{ width: "15%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>NAME</th>
+                <th style={{ width: "14%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>NAME</th>
                 <th style={{ width: "10%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>SAP ID</th>
                 <th style={{ width: "10%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>ROLE</th>
-                <th style={{ width: "20%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>DEPARTMENT</th>
-                <th style={{ width: "20%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>SECTION</th>
-                <th style={{ width: "15%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>CONTACT</th>
-                <th style={{ width: "10%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>STATUS</th>
+                <th style={{ width: "18%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>DEPARTMENT</th>
+                <th style={{ width: "16%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>SECTION</th>
+                <th style={{ width: "14%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>CONTACT</th>
+                <th style={{ width: "8%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>STATUS</th>
+                <th style={{ width: "10%", padding: "12px 16px", textAlign: "left", color: theme.subText, fontSize: 11, letterSpacing: 0.4 }}>ACTION</th>
               </tr>
             </thead>
             <tbody>
@@ -678,6 +700,25 @@ export default function EmployeesPage() {
                   <td style={{ padding: "12px 16px", color: theme.subText, fontSize: "13px" }}>{v.section_name || "-"}</td>
                   <td style={{ padding: "12px 16px", color: theme.subText, fontSize: "13px" }}>{v.contact || "-"}</td>
                   <td style={{ padding: "12px 16px", color: v.status === "active" ? "#34D399" : "#F87171", fontSize: "13px", fontWeight: 600 }}>{v.status}</td>
+                  <td style={{ padding: "12px 16px" }}>
+                    <button
+                      type="button"
+                      onClick={() => toggleStatus(v.id, v.status)}
+                      style={{
+                        background: v.status === "active" ? "rgba(239, 68, 68, 0.1)" : "rgba(16, 185, 129, 0.1)",
+                        color: v.status === "active" ? "#F87171" : "#34D399",
+                        border: `1px solid ${v.status === "active" ? "rgba(239, 68, 68, 0.35)" : "rgba(16, 185, 129, 0.35)"}`,
+                        borderRadius: 6,
+                        padding: "6px 8px",
+                        cursor: "pointer",
+                        fontSize: 12,
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {v.status === "active" ? "Deactivate" : "Activate"}
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -171,6 +171,30 @@ exports.updateVehicleStatus = (req, res) => {
     res.json({ message: "Vehicle status updated successfully" });
   });
 };
+
+exports.updateEmployeeStatus = (req, res) => {
+  const { status } = req.body;
+  const { id } = req.params;
+
+  if (!['active', 'inactive'].includes(status)) {
+    return res.status(400).json({ message: "Invalid employee status." });
+  }
+
+  const sql = "UPDATE employees SET status = ? WHERE id = ?";
+
+  db.query(sql, [status, id], (err, result) => {
+    if (err) {
+      console.error("Employee Status Update Error:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Employee not found." });
+    }
+
+    res.json({ message: "Employee status updated successfully", status });
+  });
+};
 exports.addDepartment = (req, res) => {
   const { dept_name, contact, incharge_id, incharge_name, status } = req.body;
   const cleanDeptName = toTitleCase(dept_name);

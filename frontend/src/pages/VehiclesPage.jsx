@@ -17,27 +17,26 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const input = {
-  background: "#080C18",
-  border: "1px solid rgba(255,255,255,0.08)",
-  borderRadius: "8px",
-  padding: "10px 14px",
-  color: "#F1F5F9",
-  fontSize: "14px",
-  width: "100%",
-  height: "44px",
-  boxSizing: "border-box",
-  outline: "none",
-};
-
-const select = {
-  ...input,
-  cursor: "pointer",
-};
-
 export default function VehiclesPage() {
   const { isDark } = useTheme();
   const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#94A3B8' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
+  const input = {
+    background: isDark ? "#080C18" : "#FFFFFF",
+    border: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(15,23,42,0.12)",
+    borderRadius: "8px",
+    padding: "10px 14px",
+    color: theme.text,
+    fontSize: "14px",
+    width: "100%",
+    height: "44px",
+    boxSizing: "border-box",
+    outline: "none",
+  };
+  const select = {
+    ...input,
+    cursor: "pointer",
+  };
+  const optionStyle = { background: isDark ? '#1E293B' : '#FFFFFF', color: theme.text };
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
   const headers = { Authorization: `Bearer ${token}` };
@@ -69,7 +68,9 @@ export default function VehiclesPage() {
       setShowForm(false);
       setForm({ reg_no: "", vehicle_type: "", department_id: "", section_id: "", driver_name: "", tank_capacity: "" });
       load();
-    } catch { alert('Error adding vehicle'); }
+    } catch (err) {
+      alert(err.response?.data?.message || 'Error adding vehicle');
+    }
   };
 
   const load = async () => {
@@ -136,38 +137,38 @@ export default function VehiclesPage() {
                 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
-                    <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>REGISTRATION NO</label>
+                    <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>REGISTRATION NO</label>
                     <input style={input} placeholder="CG04AB1234" value={form.reg_no} onChange={(e) => setForm({ ...form, reg_no: e.target.value.toUpperCase() })} required />
                   </div>
                  <div>
-                  <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>TYPE</label>
+                  <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>TYPE</label>
                   <select style={select} value={form.vehicle_type} onChange={(e) => setForm({ ...form, vehicle_type: e.target.value })} required>
-                    <option value="" style={{ background: '#1E293B' }}>Select Type</option>
-                    <option value="Truck" style={{ background: '#1E293B' }}>Truck</option>
-                    <option value="Car" style={{ background: '#1E293B' }}>Car</option>
-                    <option value="Hired Vehicle" style={{ background: '#1E293B' }}>Hired Vehicle</option>
+                    <option value="" style={optionStyle}>Select Type</option>
+                    <option value="Truck" style={optionStyle}>Truck</option>
+                    <option value="Car" style={optionStyle}>Car</option>
+                    <option value="Hired Vehicle" style={optionStyle}>Hired Vehicle</option>
                   </select>
                 </div>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
-                    <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>DEPARTMENT</label>
+                    <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>DEPARTMENT</label>
                     <select style={select} value={form.department_id} onChange={(e) => setForm({ ...form, department_id: e.target.value })} required>
-                      <option value="" style={{ background: '#1E293B' }}>Select Department</option>
+                      <option value="" style={optionStyle}>Select Department</option>
                       {departments.map(dept => (
-                        <option key={dept.id} value={dept.id} style={{ background: '#1E293B' }}>{dept.name}</option>
+                        <option key={dept.id} value={dept.id} style={optionStyle}>{dept.name}</option>
                       ))}
                     </select>
                   </div>
                   <div>
-                    <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>SECTION</label>
+                    <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>SECTION</label>
                     <select style={select} value={form.section_id} onChange={(e) => setForm({ ...form, section_id: e.target.value })}>
-                      <option value="" style={{ background: '#1E293B' }}>Select Section</option>
+                      <option value="" style={optionStyle}>Select Section</option>
                       {sections
                         .filter(section => !form.department_id || String(section.dept_id) === String(form.department_id))
                         .map(section => (
-                          <option key={section.id} value={section.id} style={{ background: '#1E293B' }}>{section.section_name}</option>
+                          <option key={section.id} value={section.id} style={optionStyle}>{section.section_name}</option>
                         ))}
                     </select>
                   </div>
@@ -175,11 +176,11 @@ export default function VehiclesPage() {
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
                   <div>
-                    <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>DRIVER NAME</label>
+                    <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>DRIVER NAME</label>
                     <input style={input} placeholder="Driver Name" value={form.driver_name} onChange={(e) => setForm({ ...form, driver_name: e.target.value })} required />
                   </div>
                   <div>
-                    <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>TANK CAPACITY</label>
+                    <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px' }}>TANK CAPACITY</label>
                     <input style={input} type="number" placeholder="e.g., 100.00" value={form.tank_capacity} onChange={(e) => setForm({ ...form, tank_capacity: e.target.value })} required />
                   </div>
                 </div>

@@ -20,12 +20,12 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const StatCard = ({ label, value, color, icon }) => (
-  <div style={{ background: '#0F172A', border: `1px solid ${color}22`, borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '14px' }}>
+const StatCard = ({ label, value, color, icon, theme }) => (
+  <div style={{ background: theme.cardBg, border: `1px solid ${color}22`, borderRadius: '14px', padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '14px' }}>
     <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: `${color}18`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0, }}>{icon}</div>
     <div>
-      <div style={{ color: '#475569', fontSize: '11px', fontWeight: 500 }}>{label}</div>
-      <div style={{ color: '#F1F5F9', fontSize: '26px', fontWeight: 600, lineHeight: 1.2 }}>{value}</div>
+      <div style={{ color: theme.subText, fontSize: '11px', fontWeight: 500 }}>{label}</div>
+      <div style={{ color: theme.text, fontSize: '26px', fontWeight: 600, lineHeight: 1.2 }}>{value}</div>
     </div>
   </div>
 );
@@ -100,10 +100,10 @@ const AdminDashboard = () => {
         </PageHeader>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem', marginBottom: '1.75rem' }}>
-          <StatCard label="TOTAL" value={stats.total} color="#3B82F6" icon="📊" />
-          <StatCard label="PENDING" value={stats.pending} color="#F59E0B" icon="⏳" />
-          <StatCard label="APPROVED" value={stats.approved} color="#10B981" icon="✅" />
-          <StatCard label="REJECTED" value={stats.rejected} color="#EF4444" icon="❌" />
+          <StatCard label="TOTAL" value={stats.total} color="#3B82F6" icon="📊" theme={theme} />
+          <StatCard label="PENDING" value={stats.pending} color="#F59E0B" icon="⏳" theme={theme} />
+          <StatCard label="APPROVED" value={stats.approved} color="#10B981" icon="✅" theme={theme} />
+          <StatCard label="REJECTED" value={stats.rejected} color="#EF4444" icon="❌" theme={theme} />
         </div>
 
         <div style={{ background: theme.cardBg, border: `1px solid ${theme.border}`, borderRadius: '16px', overflow: 'hidden' }}>

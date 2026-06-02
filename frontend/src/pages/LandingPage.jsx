@@ -5,7 +5,7 @@ import { useTheme } from '../context/ThemeContext';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
   
   const theme = {
     bg: isDark ? '#080C18' : '#F1F5F9',
@@ -39,6 +39,28 @@ const LandingPage = () => {
       fontFamily: "'DM Sans', sans-serif",
       padding: '2rem'
     }}>
+      <button
+        type="button"
+        onClick={toggleTheme}
+        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        style={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          width: 42,
+          height: 42,
+          borderRadius: 10,
+          border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(15,23,42,0.08)',
+          background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.85)',
+          color: theme.text,
+          cursor: 'pointer',
+          fontSize: 18,
+          boxShadow: isDark ? 'none' : '0 8px 20px rgba(15,23,42,0.08)',
+        }}
+      >
+        {isDark ? '🌞' : '🌙'}
+      </button>
+
       <div style={{ textAlign: 'center', width: '100%', maxWidth: '380px' }}>
         
         {/* ✅ Logo Section - onClick add kiya */}

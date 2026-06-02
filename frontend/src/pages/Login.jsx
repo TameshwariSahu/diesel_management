@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -10,6 +11,19 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { isDark, toggleTheme } = useTheme();
+
+  const theme = {
+    bg: isDark ? '#080C18' : '#F1F5F9',
+    cardBg: isDark ? '#0F172A' : '#FFFFFF',
+    text: isDark ? '#F1F5F9' : '#1E293B',
+    subText: isDark ? '#94A3B8' : '#64748B',
+    mutedText: isDark ? '#334155' : '#94A3B8',
+    border: isDark ? 'rgba(59,130,246,0.15)' : 'rgba(15,23,42,0.08)',
+    inputBg: isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF',
+    inputBorder: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.12)',
+    shadow: isDark ? '0 25px 50px rgba(0,0,0,0.5)' : '0 25px 50px rgba(15,23,42,0.12)',
+  };
 
   // const handleLogin = async (e) => {
   //   e.preventDefault();
@@ -93,7 +107,7 @@ const Login = () => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#080C18',
+      background: isDark ? '#080C18' : 'linear-gradient(135deg, #eff6ff 0%, #f8fafc 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -112,14 +126,36 @@ const Login = () => {
         .logo-click:hover { opacity: 0.8; }
       `}</style>
 
+      <button
+        type="button"
+        onClick={toggleTheme}
+        title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        style={{
+          position: 'absolute',
+          top: 20,
+          right: 20,
+          width: 42,
+          height: 42,
+          borderRadius: 10,
+          border: theme.border,
+          background: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.85)',
+          color: theme.text,
+          cursor: 'pointer',
+          fontSize: 18,
+          boxShadow: isDark ? 'none' : '0 8px 20px rgba(15,23,42,0.08)',
+        }}
+      >
+        {isDark ? '🌞' : '🌙'}
+      </button>
+
       <div className="login-card" style={{
-        background: '#0F172A',
-        border: '1px solid rgba(59,130,246,0.15)',
+        background: theme.cardBg,
+        border: `1px solid ${theme.border}`,
         borderRadius: '20px',
         padding: '2.5rem',
         width: '100%',
         maxWidth: '400px',
-        boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+        boxShadow: theme.shadow,
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
        
@@ -137,11 +173,11 @@ const Login = () => {
           <h1 
             className="logo-click"
             onClick={handleLogoClick}
-            style={{ color: '#F1F5F9', fontSize: '24px', fontWeight: 600, margin: 0, letterSpacing: '-0.5px' }}
+            style={{ color: theme.text, fontSize: '24px', fontWeight: 600, margin: 0, letterSpacing: '-0.5px' }}
           >
             Diesel Management System
           </h1>
-          <p style={{ color: '#64748B', fontSize: '13px', marginTop: '4px' }}>
+          <p style={{ color: theme.subText, fontSize: '13px', marginTop: '4px' }}>
             Vehicle Fuel Management System
           </p>
         </div>
@@ -162,8 +198,8 @@ const Login = () => {
         )}
 
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                   <div>
-            <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px', letterSpacing: '0.3px' }}>
+           <div>
+            <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px', letterSpacing: '0.3px' }}>
               SAP ID
             </label>
             <input
@@ -177,18 +213,18 @@ const Login = () => {
               required
               style={{
                 width: '100%', boxSizing: 'border-box',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: theme.inputBg,
+                border: `1px solid ${theme.inputBorder}`,
                 borderRadius: '10px',
                 padding: '11px 14px',
-                color: '#F1F5F9',
+                color: theme.text,
                 fontSize: '14px',
               }}
             />
           </div>
 
           <div>
-            <label style={{ color: '#94A3B8', fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px', letterSpacing: '0.3px' }}>
+            <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px', letterSpacing: '0.3px' }}>
               PASSWORD
             </label>
             <input
@@ -200,11 +236,11 @@ const Login = () => {
               required
               style={{
                 width: '100%', boxSizing: 'border-box',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: theme.inputBg,
+                border: `1px solid ${theme.inputBorder}`,
                 borderRadius: '10px',
                 padding: '11px 14px',
-                color: '#F1F5F9',
+                color: theme.text,
                 fontSize: '14px',
               }}
             />
@@ -232,7 +268,7 @@ const Login = () => {
           </button>
         </form>
 
-        <p style={{ color: '#334155', fontSize: '12px', textAlign: 'center', marginTop: '1.5rem' }}>
+        <p style={{ color: theme.mutedText, fontSize: '12px', textAlign: 'center', marginTop: '1.5rem' }}>
           Demo: admin / password
         </p>
       </div>

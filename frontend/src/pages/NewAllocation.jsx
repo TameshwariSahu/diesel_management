@@ -1,22 +1,31 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getTodayInputValue } from '../utils/date';
-
-const inputStyle = {
-  width: '100%', boxSizing: 'border-box',
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: '8px', padding: '9px 12px',
-  color: '#F1F5F9', fontSize: '13px',
-  textTransform: 'Capitalize',
-};
-
-const labelStyle = {
-  color: '#64748B', fontSize: '11px', fontWeight: 500,
-  display: 'block', marginBottom: '5px', letterSpacing: '0.3px',
-};
+import { useTheme } from '../context/ThemeContext';
 
 const NewAllocation = ({ onSuccess }) => {
+  const { isDark } = useTheme();
+  const theme = {
+    cardBg: isDark ? '#0F172A' : '#FFFFFF',
+    text: isDark ? '#F1F5F9' : '#1E293B',
+    subText: isDark ? '#64748B' : '#64748B',
+    inputBg: isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF',
+    inputBorder: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.12)',
+    mutedInputBg: isDark ? 'rgba(255,255,255,0.02)' : '#F8FAFC',
+    border: isDark ? 'rgba(59,130,246,0.12)' : 'rgba(15,23,42,0.08)'
+  };
+  const inputStyle = {
+    width: '100%', boxSizing: 'border-box',
+    background: theme.inputBg,
+    border: `1px solid ${theme.inputBorder}`,
+    borderRadius: '8px', padding: '9px 12px',
+    color: theme.text, fontSize: '13px',
+    textTransform: 'Capitalize',
+  };
+  const labelStyle = {
+    color: theme.subText, fontSize: '11px', fontWeight: 500,
+    display: 'block', marginBottom: '5px', letterSpacing: '0.3px',
+  };
   const [vehicles, setVehicles] = useState([]);
   const [formData, setFormData] = useState({
   allocation_date: getTodayInputValue(),
@@ -88,14 +97,14 @@ console.log("result",result)
 
   return (
     <div style={{
-      background: '#0F172A',
-      border: '1px solid rgba(59,130,246,0.12)',
+      background: theme.cardBg,
+      border: `1px solid ${theme.border}`,
       borderRadius: '16px', padding: '1.75rem',
     }}>
-      <h2 style={{ color: '#F1F5F9', fontSize: '17px', fontWeight: 600, margin: '0 0 4px' }}>
+      <h2 style={{ color: theme.text, fontSize: '17px', fontWeight: 600, margin: '0 0 4px' }}>
         New Diesel Allocation
       </h2>
-      <p style={{ color: '#475569', fontSize: '13px', margin: '0 0 1.5rem' }}>
+      <p style={{ color: theme.subText, fontSize: '13px', margin: '0 0 1.5rem' }}>
         Submit a fuel allocation request for admin approval
       </p>
 
@@ -177,7 +186,7 @@ console.log("result",result)
           <div>
             <label style={labelStyle}>TOTAL DISTANCE (KM)</label>
             <input 
-              style={{ ...inputStyle, background: 'rgba(255,255,255,0.02)', color: '#64748B', cursor: 'not-allowed' }}
+              style={{ ...inputStyle, background: theme.mutedInputBg, color: theme.subText, cursor: 'not-allowed' }}
               type="number" 
               value={((Number(formData.closing_reading) || 0) - (Number(formData.opening_reading) || 0)).toFixed(2)} 
               readOnly 

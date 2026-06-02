@@ -12,7 +12,8 @@ const {
   addSection,
   updateSectionStatus,
   updateDepartmentStatus, 
-  updateVehicleStatus  
+  updateVehicleStatus,
+  updateEmployeeStatus
 } = require('../controllers/masterController');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 
@@ -33,6 +34,7 @@ router.post('/sections', verifyToken, isAdmin, addSection);
 // ✅ UPDATE STATUS ROUTES (Department & Vehicle)
 router.put('/departments/:id/status', verifyToken, isAdmin, updateDepartmentStatus);
 router.put('/vehicles/:id/status', verifyToken, isAdmin, updateVehicleStatus);
+router.put('/employees/:id/status', verifyToken, isAdmin, updateEmployeeStatus);
 router.put('/sections/:id/status', verifyToken, isAdmin, updateSectionStatus);
 
 module.exports = router;
