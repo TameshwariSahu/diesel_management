@@ -6,7 +6,7 @@ const db = mysql.createConnection({
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'diesel_management',
-  port: 3307,
+  port: process.env.DB_PORT || 3306,
   connectTimeout: 20000
 });
 

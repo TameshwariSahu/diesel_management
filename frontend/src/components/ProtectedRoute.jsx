@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { API_BASE_URL } from '../utils/api';
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 
       try {
         // Call a backend route to verify the token is still valid
-        const res = await axios.get('http://localhost:5000/api/auth/verify', {
+        const res = await axios.get(`${API_BASE_URL}/api/auth/verify`, {
           headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -61,3 +62,5 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 export default ProtectedRoute;
+
+

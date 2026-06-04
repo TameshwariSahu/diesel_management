@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../utils/api';
 import { getTodayInputValue } from '../utils/date';
 import { useTheme } from '../context/ThemeContext';
 
@@ -41,7 +42,7 @@ const NewAllocation = ({ onSuccess }) => {
     useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     
-    axios.get('http://localhost:5000/api/masters/vehicles', {
+    axios.get(`${API_BASE_URL}/api/masters/vehicles`, {
       headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       params: { all: true }
     }).then(res => {
@@ -77,7 +78,7 @@ const NewAllocation = ({ onSuccess }) => {
     setMessage('');
     try {
       const result = await axios.post(
-        'http://localhost:5000/api/allocations',
+        `${API_BASE_URL}/api/allocations`,
         {
           ...formData,
           vehicle_id: Number(formData.vehicle_id),
@@ -222,3 +223,5 @@ console.log("result",result)
 };
 
 export default NewAllocation;
+
+

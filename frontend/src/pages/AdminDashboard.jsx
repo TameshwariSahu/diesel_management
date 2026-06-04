@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import PageHeader from '../components/PageHeader';
@@ -54,7 +55,7 @@ const AdminDashboard = () => {
   const fetchAll = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/allocations', { 
+      const res = await axios.get(`${API_BASE_URL}/api/allocations`, { 
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         params: {
           page: currentPage,
@@ -71,7 +72,7 @@ const AdminDashboard = () => {
 
   const fetchDepartments = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/masters/departments', {
+      const res = await axios.get(`${API_BASE_URL}/api/masters/departments`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
       });
       setDepartments(res.data);
@@ -92,7 +93,7 @@ const AdminDashboard = () => {
       change_reason = "Approved by Admin"; 
     }
     try {
-      await axios.put(`http://localhost:5000/api/allocations/${id}/status`, { status, change_reason }, {
+      await axios.put(`${API_BASE_URL}/api/allocations/${id}/status`, { status, change_reason }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       fetchAll(); 
@@ -305,4 +306,6 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+
 

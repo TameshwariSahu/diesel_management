@@ -1,5 +1,6 @@
 // // import React, { useEffect, useState } from "react";
 // // import axios from "axios";
+import { API_BASE_URL } from '../utils/api';
 // // import { useNavigate } from "react-router-dom";
 // // import Navbar from "../components/Navbar";
 // // import PageHeader from "../components/PageHeader";
@@ -67,21 +68,21 @@
 
 // //   const load = async () => {
 // //     try {
-// //       const res = await axios.get("http://localhost:5000/api/masters/employees", { headers });
+// //       const res = await axios.get(`${API_BASE_URL}/api/masters/employees`, { headers });
 // //       setEmployees(res.data);
 // //     } catch (err) { console.error(err); }
 // //   };
 
 // //   const loadDepartments = async () => {
 // //     try {
-// //       const res = await axios.get("http://localhost:5000/api/masters/departments", { headers });
+// //       const res = await axios.get(`${API_BASE_URL}/api/masters/departments`, { headers });
 // //       setDepartments(res.data);
 // //     } catch (err) { console.error(err); }
 // //   };
 
 // //   const loadSections = async () => {
 // //     try {
-// //       const res = await axios.get("http://localhost:5000/api/masters/sections", { headers });
+// //       const res = await axios.get(`${API_BASE_URL}/api/masters/sections`, { headers });
 // //       setSections(res.data);
 // //     } catch (err) { console.error(err); }
 // //   };
@@ -99,7 +100,7 @@
 // //       return;
 // //     }
 // //     try {
-// //       await axios.post("http://localhost:5000/api/masters/employees", form, { headers });
+// //       await axios.post(`${API_BASE_URL}/api/masters/employees`, form, { headers });
 // //       alert("Employee added successfully!");
 // //       setForm({ name: "", sapId: "", password: "", role: "employee", deptId: "", sectionId: "", contact: "" });
 // //       load();
@@ -249,21 +250,21 @@
 
 //   const load = async () => {
 //     try {
-//       const res = await axios.get("http://localhost:5000/api/masters/employees", { headers });
+//       const res = await axios.get(`${API_BASE_URL}/api/masters/employees`, { headers });
 //       setEmployees(res.data);
 //     } catch (err) { console.error(err); }
 //   };
 
 //   const loadDepartments = async () => {
 //     try {
-//       const res = await axios.get("http://localhost:5000/api/masters/departments", { headers });
+//       const res = await axios.get(`${API_BASE_URL}/api/masters/departments`, { headers });
 //       setDepartments(res.data);
 //     } catch (err) { console.error(err); }
 //   };
 
 //   const loadSections = async () => {
 //     try {
-//       const res = await axios.get("http://localhost:5000/api/masters/sections", { headers });
+//       const res = await axios.get(`${API_BASE_URL}/api/masters/sections`, { headers });
 //       setSections(res.data);
 //     } catch (err) { console.error(err); }
 //   };
@@ -281,7 +282,7 @@
 //       return;
 //     }
 //     try {
-//       await axios.post("http://localhost:5000/api/masters/employees", form, { headers });
+//       await axios.post(`${API_BASE_URL}/api/masters/employees`, form, { headers });
 //       alert("Employee added successfully!");
 //       setForm({ name: "", sapId: "", password: "", role: "employee", deptId: "", sectionId: "", contact: "" });
 //       load();
@@ -486,21 +487,21 @@ export default function EmployeesPage() {
 
   const load = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/masters/employees", { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/masters/employees`, { headers });
       setEmployees(res.data);
     } catch (err) { console.error(err); }
   };
 
   const loadDepartments = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/masters/departments", { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/masters/departments`, { headers });
       setDepartments(res.data.filter(dept => dept.status === 'active'));
     } catch (err) { console.error(err); }
   };
 
   const loadSections = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/masters/sections", { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/masters/sections`, { headers });
       setSections(res.data);
     } catch (err) { console.error(err); }
   };
@@ -546,10 +547,10 @@ export default function EmployeesPage() {
 
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/masters/employees/${editingId}`, form, { headers });
+        await axios.put(`${API_BASE_URL}/api/masters/employees/${editingId}`, form, { headers });
         setToast({ show: true, message: "Employee updated successfully!", type: "success" });
       } else {
-        await axios.post("http://localhost:5000/api/masters/employees", form, { headers });
+        await axios.post(`${API_BASE_URL}/api/masters/employees`, form, { headers });
         setToast({ show: true, message: "Employee added successfully!", type: "success" });
       }
 
@@ -587,7 +588,7 @@ export default function EmployeesPage() {
 
     try {
       await axios.put(
-        `http://localhost:5000/api/masters/employees/${id}/status`,
+        `${API_BASE_URL}/api/masters/employees/${id}/status`,
         { status: nextStatus },
         { headers }
       );
@@ -699,7 +700,14 @@ export default function EmployeesPage() {
               ))}
             </select>
 
-            <input style={input} type="tel" placeholder="Contact Number" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value })} />
+            <input
+              style={input}
+              type="tel"
+              maxLength={10}
+              placeholder="Contact Number"
+              value={form.contact}
+              onChange={(e) => setForm({ ...form, contact: e.target.value.replace(/[^0-9]/g, '') })}
+            />
             
             <button type="submit" style={{ 
               background: "#3B82F6", 
@@ -750,7 +758,7 @@ export default function EmployeesPage() {
                   <td style={{ padding: "12px 16px", color: v.role === 'admin' ? '#F59E0B' : '#3B82F6', fontSize: "13px", fontWeight: 600 }}>{v.role}</td>
                   <td style={{ padding: "12px 16px", color: theme.subText, fontSize: "13px" }}>{v.dept_name || "-"}</td>
                   <td style={{ padding: "12px 16px", color: theme.subText, fontSize: "13px" }}>{v.section_name || "-"}</td>
-                  <td style={{ padding: "12px 16px", color: theme.subText, fontSize: "13px" }}>{v.contact || "-"}</td>
+                  <td style={{ padding: "12px 16px", color: theme.subText, fontSize: "13px" }} >{v.contact || "-"}</td>
                   <td style={{ padding: "12px 16px", color: v.status === "active" ? "#34D399" : "#F87171", fontSize: "13px", fontWeight: 600 }}>{v.status}</td>
                   <td style={{ padding: "12px 16px" }}>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -800,3 +808,5 @@ export default function EmployeesPage() {
     </div>
   );
 }
+
+

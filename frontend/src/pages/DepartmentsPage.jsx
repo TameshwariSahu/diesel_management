@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from '../utils/api';
 import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
@@ -43,7 +44,7 @@ export default function DepartmentsPage() {
   )];
 
   const load = async () => {
-    const res = await axios.get("http://localhost:5000/api/masters/departments", { headers });
+    const res = await axios.get(`${API_BASE_URL}/api/masters/departments`, { headers });
     setDepartments(res.data);
   };
 
@@ -57,7 +58,7 @@ export default function DepartmentsPage() {
   //     alert("Contact number must be exactly 10 digits.");
   //     return;
   //   }
-  //   await axios.post("http://localhost:5000/api/masters/departments", form, { headers });
+  //   await axios.post(`${API_BASE_URL}/api/masters/departments`, form, { headers });
   //   setForm({ dept_name: "", section_name: "", incharge_name: "", contact: "" });
   //   load();
   // };
@@ -73,10 +74,10 @@ const saveDepartment = async (e) => {
     };
 
     if (editingId) {
-      await axios.put(`http://localhost:5000/api/masters/departments/${editingId}`, payload, { headers });
+      await axios.put(`${API_BASE_URL}/api/masters/departments/${editingId}`, payload, { headers });
       alert("Department updated successfully!");
     } else {
-      await axios.post("http://localhost:5000/api/masters/departments", payload, { headers });
+      await axios.post(`${API_BASE_URL}/api/masters/departments`, payload, { headers });
       alert("Department added successfully!");
     }
 
@@ -90,7 +91,7 @@ const saveDepartment = async (e) => {
 };
 
   const toggleStatus = async (id, currentStatus) => {
-    await axios.put(`http://localhost:5000/api/masters/departments/${id}/status`, { status: currentStatus === "active" ? "inactive" : "active" }, { headers });
+    await axios.put(`${API_BASE_URL}/api/masters/departments/${id}/status`, { status: currentStatus === "active" ? "inactive" : "active" }, { headers });
     load();
   };
 
@@ -206,3 +207,5 @@ const saveDepartment = async (e) => {
     </div>
   );
 }
+
+

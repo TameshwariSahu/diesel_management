@@ -1,5 +1,6 @@
 // import React, { useState, useEffect } from "react";
 // import axios from "axios";
+import { API_BASE_URL } from '../utils/api';
 // import { useNavigate } from "react-router-dom";
 // import Navbar from "../components/Navbar";
 // import PageHeader from "../components/PageHeader";
@@ -34,7 +35,7 @@
 
 //   const load = async () => {
 //     try {
-//       const res = await axios.get("http://localhost:5000/api/masters/sections", { headers });
+//       const res = await axios.get(`${API_BASE_URL}/api/masters/sections`, { headers });
 //       setSections(res.data);
 //     } catch (err) { console.error(err); }
 //     finally { setLoading(false); }
@@ -47,7 +48,7 @@
 //       return;
 //     }
 //     try {
-//       await axios.post("http://localhost:5000/api/masters/sections", form, { headers });
+//       await axios.post(`${API_BASE_URL}/api/masters/sections`, form, { headers });
 //       alert("Section added successfully!");
 //       setForm({ section_name: "", dept_id: "" });
 //       load();
@@ -57,7 +58,7 @@
 //   };
 
 //   const toggleStatus = async (id, currentStatus) => {
-//     await axios.put(`http://localhost:5000/api/masters/sections/${id}/status`, { status: currentStatus === "active" ? "inactive" : "active" }, { headers });
+//     await axios.put(`${API_BASE_URL}/api/masters/sections/${id}/status`, { status: currentStatus === "active" ? "inactive" : "active" }, { headers });
 //     load();
 //   };
 
@@ -150,11 +151,11 @@ export default function SectionsPage() {
   const load = async () => {
     try {
       // Fetch Sections
-      const secRes = await axios.get("http://localhost:5000/api/masters/sections", { headers });
+      const secRes = await axios.get(`${API_BASE_URL}/api/masters/sections`, { headers });
       setSections(secRes.data);
 
       // Fetch Departments (for the dropdown)
-      const deptRes = await axios.get("http://localhost:5000/api/masters/departments", { headers });
+      const deptRes = await axios.get(`${API_BASE_URL}/api/masters/departments`, { headers });
       setDepartments(deptRes.data.filter(dept => dept.status === 'active'));
     } catch (err) { 
       console.error(err); 
@@ -175,7 +176,7 @@ export default function SectionsPage() {
     }
 
     try {
-      await axios.post("http://localhost:5000/api/masters/sections", form, { headers });
+      await axios.post(`${API_BASE_URL}/api/masters/sections`, form, { headers });
       alert("Section added successfully!");
       setForm({ section_name: "", dept_id: "" });
       load(); // Refresh list
@@ -262,3 +263,5 @@ export default function SectionsPage() {
     </div>
   );
 }
+
+

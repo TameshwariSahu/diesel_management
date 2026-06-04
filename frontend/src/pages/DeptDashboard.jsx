@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../utils/api';
 import Navbar from '../components/Navbar';
 import PageHeader from '../components/PageHeader';
 import Pagination from '../components/Pagination';
@@ -33,7 +34,7 @@ const DeptDashboard = () => {
   const fetchAllocations = async () => {
     try {
       setLoading(true);
-      const res = await axios.get('http://localhost:5000/api/allocations', {
+      const res = await axios.get(`${API_BASE_URL}/api/allocations`, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         params: { page: currentPage } 
       });
@@ -46,7 +47,7 @@ const DeptDashboard = () => {
   const fetchDepartmentName = async () => {
     if (user.department_id) {
       try {
-        const res = await axios.get('http://localhost:5000/api/masters/departments', {
+        const res = await axios.get(`${API_BASE_URL}/api/masters/departments`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         const dept = res.data.find(d => d.id == user.department_id);
@@ -125,3 +126,5 @@ const DeptDashboard = () => {
 };
 
 export default DeptDashboard;
+
+

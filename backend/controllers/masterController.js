@@ -355,6 +355,10 @@ exports.addEmployee = (req, res) => {
     return res.status(400).json({ message: "SAP ID must be exactly 7 digits." });
   }
 
+  if (contact && !/^\d{10}$/.test(contact)) {
+    return res.status(400).json({ message: "Contact number must be exactly 10 digits." });
+  }
+
   // 2. Check if SAP ID already exists
   const checkSql = "SELECT id FROM employees WHERE sap_id = ?";
   db.query(checkSql, [sapId], (err, results) => {

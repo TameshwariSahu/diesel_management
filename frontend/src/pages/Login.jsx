@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 
@@ -30,7 +31,7 @@ const Login = () => {
   //   setLoading(true);
   //   setError('');
   //   try {
-  //     const res = await axios.post('http://localhost:5000/api/auth/login', { sapId: username, password });
+  //     const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { sapId: username, password });
    
   //     console.log("Backend Response:", res.data);
 
@@ -58,7 +59,7 @@ const Login = () => {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', { 
+      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { 
         sapId: username, 
         password: password 
       });
@@ -277,4 +278,6 @@ const Login = () => {
 };
 
 export default Login;
+
+
 

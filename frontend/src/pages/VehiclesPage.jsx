@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from '../utils/api';
 import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
@@ -52,7 +53,7 @@ export default function VehiclesPage() {
   const [form, setForm] = useState({ reg_no: "", vehicle_type: "", department_id: "", section_id: "", driver_name: "", tank_capacity: "" });
 
   const toggleStatus = async (id, currentStatus) => {
-    await axios.put(`http://localhost:5000/api/masters/vehicles/${id}/status`, { status: currentStatus === "active" ? "inactive" : "active" }, { headers });
+    await axios.put(`${API_BASE_URL}/api/masters/vehicles/${id}/status`, { status: currentStatus === "active" ? "inactive" : "active" }, { headers });
     load(); 
   };
 
@@ -63,7 +64,7 @@ export default function VehiclesPage() {
       return;
     }
     try {
-      await axios.post("http://localhost:5000/api/masters/vehicles", form, { headers });
+      await axios.post(`${API_BASE_URL}/api/masters/vehicles`, form, { headers });
       alert("Vehicle added successfully!");
       setShowForm(false);
       setForm({ reg_no: "", vehicle_type: "", department_id: "", section_id: "", driver_name: "", tank_capacity: "" });
@@ -76,7 +77,7 @@ export default function VehiclesPage() {
   const load = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/api/masters/vehicles", { 
+      const res = await axios.get(`${API_BASE_URL}/api/masters/vehicles`, { 
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
         params: { page: currentPage } 
       });
@@ -88,14 +89,14 @@ export default function VehiclesPage() {
 
   const loadDepartments = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/masters/departments", { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/masters/departments`, { headers });
       setDepartments(res.data.filter(d => d.status === 'active'));
     } catch (err) { console.error(err); }
   };
 
   const loadSections = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/masters/sections", { headers });
+      const res = await axios.get(`${API_BASE_URL}/api/masters/sections`, { headers });
       setSections(res.data);
     } catch (err) { console.error(err); }
   };
@@ -265,3 +266,5 @@ export default function VehiclesPage() {
     </div>
   );
 }
+
+
