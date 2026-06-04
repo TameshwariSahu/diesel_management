@@ -9,7 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 
 export default function DepartmentsPage() {
   const { isDark } = useTheme();
-  const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#475569' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
+  const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#94A3B8' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
   const input = {
     background: isDark ? "rgba(255,255,255,0.04)" : "#FFFFFF",
     border: isDark ? "1px solid rgba(255,255,255,0.08)" : "1px solid rgba(15,23,42,0.12)",
@@ -31,7 +31,6 @@ export default function DepartmentsPage() {
   const emptyForm = { dept_name: "", incharge_name: "", contact: "" };
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
-  const [showNewIncharge, setShowNewIncharge] = useState(false);
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -83,7 +82,6 @@ const saveDepartment = async (e) => {
 
     setForm(emptyForm);
     setEditingId(null);
-    setShowNewIncharge(false);
     load();
   } catch (err) {
     alert(err.response?.data?.message || "Error saving department");
@@ -102,14 +100,12 @@ const saveDepartment = async (e) => {
       incharge_name: department.incharge_name || "",
       contact: department.contact || "",
     });
-    setShowNewIncharge(false);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setForm(emptyForm);
-    setShowNewIncharge(false);
   };
 
   return (
@@ -122,43 +118,16 @@ const saveDepartment = async (e) => {
 
               <form onSubmit={saveDepartment} style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr 1fr auto auto", gap: 10, margin: "16px 0" }}>
           <input style={input} placeholder="Department name" value={form.dept_name} onChange={(e) => setForm({ ...form, dept_name: e.target.value })} required />
-          {showNewIncharge ? (
-            <div style={{ display: "flex", gap: 5 }}>
-              <input
-                style={input}
-                placeholder="New incharge name"
-                value={form.incharge_name}
-                onChange={(e) => setForm({ ...form, incharge_name: e.target.value })}
-              />
-              <button
-                type="button"
-                onClick={() => { setShowNewIncharge(false); setForm({ ...form, incharge_name: "" }); }}
-                title="Back to saved incharges"
-                style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#F87171', borderRadius: 10, padding: '0 10px', cursor: 'pointer', fontSize: '16px' }}
-              >
-                ✕
-              </button>
-            </div>
-          ) : (
-            <select
-              style={input}
-              value={form.incharge_name}
-              onChange={(e) => {
-                if (e.target.value === "__new__") {
-                  setShowNewIncharge(true);
-                  setForm({ ...form, incharge_name: "" });
-                  return;
-                }
-                setForm({ ...form, incharge_name: e.target.value });
-              }}
-            >
-              <option value="" style={optionStyle}>No Incharge / Select Saved</option>
-              {savedIncharges.map(name => (
-                <option key={name} value={name} style={optionStyle}>{name}</option>
-              ))}
-              <option value="__new__" style={{ ...optionStyle, color: '#F59E0B' }}>+ Add New Incharge</option>
-            </select>
-          )}
+          <select
+            style={input}
+            value={form.incharge_name}
+            onChange={(e) => setForm({ ...form, incharge_name: e.target.value })}
+          >
+            <option value="" style={optionStyle}>No Incharge / Select Saved</option>
+            {savedIncharges.map(name => (
+              <option key={name} value={name} style={optionStyle}>{name}</option>
+            ))}
+          </select>
 
           <input style={input} type="tel" maxLength={10} placeholder="Contact" value={form.contact} onChange={(e) => setForm({ ...form, contact: e.target.value.replace(/[^0-9]/g, '') })} /> 
           <button type="submit" style={{ background: "#3B82F6", color: "#fff", border: "none", borderRadius: 10, padding: "10px 14px", cursor: "pointer", fontWeight: 600 }}>

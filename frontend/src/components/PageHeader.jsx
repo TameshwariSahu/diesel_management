@@ -7,7 +7,7 @@ const PageHeader = ({ title, subtitle, showBack = true, children }) => {
   
   const theme = {
     text: isDark ? '#F1F5F9' : '#1E293B',
-    subText: isDark ? '#475569' : '#64748B',
+    subText: isDark ? '#94A3B8' : '#64748B',
   };
 
   return (

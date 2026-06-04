@@ -100,7 +100,7 @@ exports.getAllocations = (req, res) => {
     countSql += whereSql;
   }
 
-  sql += " ORDER BY da.allocation_date DESC LIMIT ? OFFSET ?";
+  sql += " ORDER BY da.allocation_date DESC, da.id DESC LIMIT ? OFFSET ?";
   params.push(limit, offset);
 
   db.query(sql, params, (err, results) => {

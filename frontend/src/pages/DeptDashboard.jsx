@@ -22,7 +22,7 @@ const StatusBadge = ({ status }) => {
 
 const DeptDashboard = () => {
   const { isDark } = useTheme();
-  const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#475569' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
+  const theme = { bg: isDark ? '#080C18' : '#F1F5F9', cardBg: isDark ? '#0F172A' : '#FFFFFF', text: isDark ? '#F1F5F9' : '#1E293B', subText: isDark ? '#94A3B8' : '#64748B', border: isDark ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.05)' };
   
   const [allocations, setAllocations] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -65,7 +65,7 @@ const DeptDashboard = () => {
      <Navbar user={user} deptName={deptName} onLogout={() => { localStorage.clear(); window.location.replace('/'); }} />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         
-        <PageHeader title={`${deptName} Dashboard`} subtitle="Manage your diesel allocation requests">
+        <PageHeader title={`${deptName} Dashboard`} subtitle="Manage your diesel allocation requests" showBack={false}>
           <button onClick={() => setShowForm(!showForm)} style={{ background: showForm ? 'rgba(239,68,68,0.1)' : '#3B82F6', border: showForm ? '1px solid rgba(239,68,68,0.2)' : 'none', color: showForm ? '#F87171' : '#fff', borderRadius: '10px', padding: '9px 20px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>
             {showForm ? '✕ Close' : '+ New Allocation'}
           </button>

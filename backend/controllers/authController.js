@@ -55,7 +55,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.login = (req, res) => {
-  const { sapId, password } = req.body; 
+  const { sapId, password, expectedRole } = req.body; 
 
   const cleanSapId = parseInt(sapId, 10); 
 
@@ -82,6 +82,14 @@ exports.login = (req, res) => {
       : storedPassword === password;
 
     if (passwordMatches) {
+      if (expectedRole && user.role !== expectedRole) {
+        return res.status(403).json({
+          message: expectedRole === "admin"
+            ? "These credentials are not allowed for admin login."
+            : "These credentials are not allowed for department login."
+        });
+      }
+
       const token = jwt.sign(
         {
           id: user.id,

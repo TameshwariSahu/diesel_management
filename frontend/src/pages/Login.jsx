@@ -9,6 +9,7 @@ import { useTheme } from '../context/ThemeContext';
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loginRole, setLoginRole] = useState('employee');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -61,7 +62,8 @@ const Login = () => {
     try {
       const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { 
         sapId: username, 
-        password: password 
+        password: password,
+        expectedRole: loginRole
       });
    
       console.log("FULL BACKEND RESPONSE:", res.data);
@@ -69,6 +71,14 @@ const Login = () => {
       // ✅ EXPLICITLY get the role from the response
       const backendRole = res.data.user.role;
       console.log("Extracted Role for Routing:", backendRole);
+
+      if (backendRole !== loginRole) {
+        setError(loginRole === 'admin'
+          ? 'These credentials are not allowed for admin login.'
+          : 'These credentials are not allowed for department login.'
+        );
+        return;
+      }
 
       // ✅ FIX: Directly check the role. No defaults.
       const targetPath = backendRole === 'admin' ? '/admin' : '/department';
@@ -199,6 +209,30 @@ const Login = () => {
         )}
 
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {[
+              { value: 'employee', label: 'Department' },
+              { value: 'admin', label: 'Admin' },
+            ].map(option => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setLoginRole(option.value)}
+                style={{
+                  background: loginRole === option.value ? '#3B82F6' : (isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC'),
+                  border: loginRole === option.value ? '1px solid #3B82F6' : `1px solid ${theme.inputBorder}`,
+                  color: loginRole === option.value ? '#FFFFFF' : theme.text,
+                  borderRadius: 10,
+                  padding: '10px 12px',
+                  cursor: 'pointer',
+                  fontSize: 13,
+                  fontWeight: 600,
+                }}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
            <div>
             <label style={{ color: theme.subText, fontSize: '12px', fontWeight: 500, display: 'block', marginBottom: '6px', letterSpacing: '0.3px' }}>
               SAP ID

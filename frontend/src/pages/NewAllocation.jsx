@@ -9,7 +9,7 @@ const NewAllocation = ({ onSuccess }) => {
   const theme = {
     cardBg: isDark ? '#0F172A' : '#FFFFFF',
     text: isDark ? '#F1F5F9' : '#1E293B',
-    subText: isDark ? '#64748B' : '#64748B',
+    subText: isDark ? '#94A3B8' : '#64748B',
     inputBg: isDark ? 'rgba(255,255,255,0.04)' : '#FFFFFF',
     inputBorder: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.12)',
     mutedInputBg: isDark ? 'rgba(255,255,255,0.02)' : '#F8FAFC',
@@ -33,7 +33,6 @@ const NewAllocation = ({ onSuccess }) => {
   vehicle_id: '',
   opening_reading: '',     
   closing_reading: '',     
-  authorized_by: '',     
   remarks: ''
 });
   const [loading, setLoading] = useState(false);
@@ -196,12 +195,7 @@ console.log("result",result)
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-          <div>
-            <label style={labelStyle}>AUTHORIZED BY</label>
-            <input style={inputStyle} type="text" name="authorized_by"
-              value={formData.authorized_by} onChange={handleChange} required placeholder="Officer name" />
-          </div>
+        <div style={{ marginBottom: '1.5rem' }}>
           <div>
             <label style={labelStyle}>REMARKS</label>
             <input style={inputStyle} type="text" name="remarks"
