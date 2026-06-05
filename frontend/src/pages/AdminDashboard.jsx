@@ -44,6 +44,8 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [toast, setToast] = useState({ message: "", type: "success" });
+  const [rejectTarget, setRejectTarget] = useState(null);
+  const [rejectReason, setRejectReason] = useState("");
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const navigate = useNavigate();
 
@@ -91,14 +93,7 @@ const AdminDashboard = () => {
     window.setTimeout(() => setToast({ message: "", type }), 3000);
   };
 
-  const updateStatus = async (id, status) => {
-    let change_reason;
-    if (status === 'Rejected') {
-      change_reason = window.prompt("Please enter rejection reason:");
-      if (change_reason === null) return; 
-    } else {
-      change_reason = "Approved by Admin"; 
-    }
+  const updateStatus = async (id, status, change_reason = "Approved by Admin") => {
     try {
       await axios.put(`${API_BASE_URL}/api/allocations/${id}/status`, { status, change_reason }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
@@ -106,6 +101,29 @@ const AdminDashboard = () => {
       showToast(`Allocation ${status.toLowerCase()} successfully!`);
       fetchAll(); 
     } catch { showToast('Error updating status', 'error'); }
+  };
+
+  const openRejectModal = (allocation) => {
+    setRejectTarget(allocation);
+    setRejectReason("");
+  };
+
+  const closeRejectModal = () => {
+    setRejectTarget(null);
+    setRejectReason("");
+  };
+
+  const submitRejection = async (e) => {
+    e.preventDefault();
+    const reason = rejectReason.trim();
+
+    if (!reason) {
+      showToast("Please enter rejection reason.", "error");
+      return;
+    }
+
+    await updateStatus(rejectTarget.id, "Rejected", reason);
+    closeRejectModal();
   };
 
   const exportPdf = () => {
@@ -297,7 +315,7 @@ const AdminDashboard = () => {
                         {item.status === 'Pending' && (
                           <div style={{ display: 'flex', gap: '6px' }}>
                             <button onClick={() => updateStatus(item.id, 'Approved')} style={{ background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.2)', color: '#34D399', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>✓ Approve</button>
-                            <button onClick={() => updateStatus(item.id, 'Rejected')} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#F87171', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>✕ Reject</button>
+                            <button onClick={() => openRejectModal(item)} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#F87171', borderRadius: '6px', padding: '4px 10px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>✕ Reject</button>
                           </div>
                         )}
                       </td>
@@ -310,6 +328,94 @@ const AdminDashboard = () => {
           <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => setCurrentPage(page)} />
         </div>
       </div>
+
+      {rejectTarget && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(2,6,23,0.72)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 16,
+            zIndex: 900,
+          }}
+        >
+          <form
+            onSubmit={submitRejection}
+            style={{
+              width: '100%',
+              maxWidth: 430,
+              background: theme.cardBg,
+              border: `1px solid ${theme.border}`,
+              borderRadius: 14,
+              padding: 20,
+              boxShadow: '0 24px 60px rgba(0,0,0,0.35)',
+            }}
+          >
+            <h3 style={{ color: theme.text, fontSize: 17, margin: '0 0 4px', fontWeight: 600 }}>
+              Rejection Reason
+            </h3>
+            <p style={{ color: theme.subText, fontSize: 13, margin: '0 0 16px' }}>
+              {rejectTarget.reg_no || 'Selected allocation'}
+            </p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Enter reason for rejection"
+              rows={4}
+              autoFocus
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                resize: 'vertical',
+                background: isDark ? '#080C18' : '#FFFFFF',
+                border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid rgba(15,23,42,0.12)',
+                color: theme.text,
+                borderRadius: 10,
+                padding: '10px 12px',
+                fontSize: 13,
+                outline: 'none',
+                marginBottom: 16,
+              }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+              <button
+                type="button"
+                onClick={closeRejectModal}
+                style={{
+                  background: 'rgba(100,116,139,0.12)',
+                  border: `1px solid ${theme.border}`,
+                  color: theme.subText,
+                  borderRadius: 8,
+                  padding: '9px 14px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: 12,
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                style={{
+                  background: '#EF4444',
+                  border: '1px solid #EF4444',
+                  color: '#FFFFFF',
+                  borderRadius: 8,
+                  padding: '9px 14px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  fontSize: 12,
+                }}
+              >
+                Reject Request
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
