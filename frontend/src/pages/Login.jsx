@@ -211,7 +211,7 @@ const Login = () => {
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {[
-              { value: 'employee', label: 'Department' },
+              { value: 'employee', label: 'Employee' },
               { value: 'admin', label: 'Admin' },
             ].map(option => (
               <button

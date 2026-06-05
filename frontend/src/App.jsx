@@ -45,7 +45,6 @@ import DepartmentsPage from './pages/DepartmentsPage';
 import VehiclesPage from './pages/VehiclesPage';
 import SectionsPage from './pages/SectionsPage';
 import EmployeesPage from './pages/EmployeesPage';
-import LandingPage from './pages/LandingPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import DeptDashboard from './pages/DeptDashboard'; 
 
@@ -54,7 +53,7 @@ function App() {
     <ThemeProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
 
           {/* Admin Routes */}
