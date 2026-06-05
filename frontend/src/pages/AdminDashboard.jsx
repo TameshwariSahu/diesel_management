@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import PageHeader from '../components/PageHeader';
 import Pagination from '../components/Pagination';
+import Toast from '../components/Toast';
 import { useTheme } from '../context/ThemeContext';
 import { formatDisplayDate } from '../utils/date';
 
@@ -42,6 +43,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [toast, setToast] = useState({ message: "", type: "success" });
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const navigate = useNavigate();
 
@@ -84,6 +86,11 @@ const AdminDashboard = () => {
   useEffect(() => { fetchDepartments(); }, []);
   useEffect(() => { fetchAll(); }, [currentPage, departmentFilter, statusFilter]);
 
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    window.setTimeout(() => setToast({ message: "", type }), 3000);
+  };
+
   const updateStatus = async (id, status) => {
     let change_reason;
     if (status === 'Rejected') {
@@ -96,8 +103,9 @@ const AdminDashboard = () => {
       await axios.put(`${API_BASE_URL}/api/allocations/${id}/status`, { status, change_reason }, {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
+      showToast(`Allocation ${status.toLowerCase()} successfully!`);
       fetchAll(); 
-    } catch { alert('Error updating status'); }
+    } catch { showToast('Error updating status', 'error'); }
   };
 
   const exportPdf = () => {
@@ -133,7 +141,7 @@ const AdminDashboard = () => {
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      alert('Please allow popups to export PDF.');
+      showToast('Please allow popups to export PDF.', 'error');
       return;
     }
 
@@ -206,6 +214,7 @@ const AdminDashboard = () => {
     <div style={{ minHeight: '100vh', background: theme.bg, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');`}</style>
       <Navbar user={user} onLogout={() => { localStorage.clear(); window.location.replace('/'); }} />
+      <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: toast.type })} />
       <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1.5rem' }}>
         <PageHeader title="Admin Dashboard" subtitle="Manage and review all diesel allocations" showBack={false}>
           <button style={navBtn} onClick={() => navigate('/admin/vehicles')}>Vehicles</button>

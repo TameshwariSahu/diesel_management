@@ -5,6 +5,7 @@ import { API_BASE_URL } from '../utils/api';
 import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
+import Toast from "../components/Toast";
 import { useTheme } from '../context/ThemeContext';
 
 export default function DepartmentsPage() {
@@ -31,6 +32,7 @@ export default function DepartmentsPage() {
   const emptyForm = { dept_name: "", incharge_name: "", contact: "" };
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
+  const [toast, setToast] = useState({ message: "", type: "success" });
   
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -45,6 +47,11 @@ export default function DepartmentsPage() {
   const load = async () => {
     const res = await axios.get(`${API_BASE_URL}/api/masters/departments`, { headers });
     setDepartments(res.data);
+  };
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    window.setTimeout(() => setToast({ message: "", type }), 3000);
   };
 
   useEffect(() => { 
@@ -74,17 +81,17 @@ const saveDepartment = async (e) => {
 
     if (editingId) {
       await axios.put(`${API_BASE_URL}/api/masters/departments/${editingId}`, payload, { headers });
-      alert("Department updated successfully!");
+      showToast("Department updated successfully!");
     } else {
       await axios.post(`${API_BASE_URL}/api/masters/departments`, payload, { headers });
-      alert("Department added successfully!");
+      showToast("Department added successfully!");
     }
 
     setForm(emptyForm);
     setEditingId(null);
     load();
   } catch (err) {
-    alert(err.response?.data?.message || "Error saving department");
+    showToast(err.response?.data?.message || "Error saving department", "error");
   }
 };
 
@@ -111,6 +118,7 @@ const saveDepartment = async (e) => {
   return (
     <div style={{ minHeight: "100vh", background: theme.bg, fontFamily: "'DM Sans', sans-serif" }}>
       <Navbar user={user} onLogout={() => { localStorage.clear(); window.location.href = "/"; }} />
+      <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: toast.type })} />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2rem 1.5rem" }}>
         

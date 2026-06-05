@@ -4,6 +4,7 @@ import { API_BASE_URL } from '../utils/api';
 import Navbar from "../components/Navbar";
 import PageHeader from "../components/PageHeader";
 import Pagination from "../components/Pagination";
+import Toast from "../components/Toast";
 import { useTheme } from '../context/ThemeContext';
 import { formatDisplayDate } from '../utils/date';
 
@@ -48,29 +49,41 @@ export default function VehiclesPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [toast, setToast] = useState({ message: "", type: "success" });
   
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ reg_no: "", vehicle_type: "", department_id: "", section_id: "", driver_name: "", tank_capacity: "" });
 
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+    window.setTimeout(() => setToast({ message: "", type }), 3000);
+  };
+
   const toggleStatus = async (id, currentStatus) => {
-    await axios.put(`${API_BASE_URL}/api/masters/vehicles/${id}/status`, { status: currentStatus === "active" ? "inactive" : "active" }, { headers });
-    load(); 
+    const nextStatus = currentStatus === "active" ? "inactive" : "active";
+    try {
+      await axios.put(`${API_BASE_URL}/api/masters/vehicles/${id}/status`, { status: nextStatus }, { headers });
+      showToast(`Vehicle ${nextStatus === "active" ? "activated" : "deactivated"} successfully!`);
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.message || "Error updating vehicle status", "error");
+    }
   };
 
   const addVehicle = async (e) => {
     e.preventDefault();
     if (form.reg_no && form.reg_no.length > 15) {
-      alert("Registration No is too long.");
+      showToast("Registration No is too long.", "error");
       return;
     }
     try {
       await axios.post(`${API_BASE_URL}/api/masters/vehicles`, form, { headers });
-      alert("Vehicle added successfully!");
+      showToast("Vehicle added successfully!");
       setShowForm(false);
       setForm({ reg_no: "", vehicle_type: "", department_id: "", section_id: "", driver_name: "", tank_capacity: "" });
       load();
     } catch (err) {
-      alert(err.response?.data?.message || 'Error adding vehicle');
+      showToast(err.response?.data?.message || 'Error adding vehicle', "error");
     }
   };
 
@@ -108,6 +121,7 @@ export default function VehiclesPage() {
     <div style={{ minHeight: "100vh", background: theme.bg, fontFamily: "'DM Sans', sans-serif" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');`}</style>
       <Navbar user={user} onLogout={() => { localStorage.clear(); window.location.href = "/"; }} />
+      <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: "", type: toast.type })} />
 
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "2rem 1.5rem" }}>
         
