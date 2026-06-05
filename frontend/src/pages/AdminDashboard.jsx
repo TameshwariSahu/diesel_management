@@ -149,7 +149,6 @@ const AdminDashboard = () => {
           <td>${escapeHtml(item.requested_by_name)}</td>
           <td>${escapeHtml(item.reg_no || item.vehicle_id)}</td>
           <td>${escapeHtml(totalKm)}</td>
-          <td>${escapeHtml(item.authorized_by)}</td>
           <td>${escapeHtml(item.remarks)}</td>
           <td>${escapeHtml(item.status)}</td>
           <td>${escapeHtml(item.change_reason)}</td>
@@ -189,14 +188,13 @@ const AdminDashboard = () => {
                 <th>Requested By</th>
                 <th>Vehicle</th>
                 <th>Total (KM)</th>
-                <th>Authorized By</th>
                 <th>Remarks</th>
                 <th>Status</th>
                 <th>Reason</th>
               </tr>
             </thead>
             <tbody>
-              ${rows || '<tr><td colspan="9">No allocation records found.</td></tr>'}
+              ${rows || '<tr><td colspan="8">No allocation records found.</td></tr>'}
             </tbody>
           </table>
           <script>
@@ -290,7 +288,7 @@ const AdminDashboard = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                    {['Date', 'Department', 'Requested By', 'Vehicle', 'Total (KM)', 'Authorized By', 'Remarks', 'Status', 'Reason', 'Action'].map(h => (
+                    {['Date', 'Department', 'Requested By', 'Vehicle', 'Total (KM)', 'Remarks', 'Status', 'Reason', 'Action'].map(h => (
                       <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: theme.subText, fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px' }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
@@ -307,7 +305,6 @@ const AdminDashboard = () => {
   ? (parseFloat(item.closing_reading) - parseFloat(item.opening_reading)).toFixed(2) 
   : '-'}  {/* {item.closing_reading && item.opening_reading ? ((Number(item.closing_reading) - Number(item.opening_reading)).toFixed(2)) : '-'} */}
                       </td>
-                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.authorized_by || '-'}</td>
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.remarks || '-'}</td>
                       <td style={{ padding: '12px 16px' }}><StatusBadge status={item.status} /></td>
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.change_reason || '-'}</td>

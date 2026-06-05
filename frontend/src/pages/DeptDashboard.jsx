@@ -95,7 +95,7 @@ const DeptDashboard = () => {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${theme.border}` }}>
-                    {['Date', 'Vehicle', 'Total (KM)', 'Authorized By', 'Remarks', 'Status', 'Reason'].map(h => (
+                    {['Date', 'Vehicle', 'Total (KM)', 'Remarks', 'Status', 'Reason'].map(h => (
                       <th key={h} style={{ padding: '10px 16px', textAlign: 'left', color: theme.subText, fontSize: '11px', fontWeight: 600, letterSpacing: '0.4px' }}>{h.toUpperCase()}</th>
                     ))}
                   </tr>
@@ -108,7 +108,6 @@ const DeptDashboard = () => {
                       <td style={{ padding: '12px 16px', color: theme.text, fontSize: '13px', fontWeight: 500 }}>
                         {item.closing_reading && item.opening_reading ? ((Number(item.closing_reading) - Number(item.opening_reading)).toFixed(2)) : '-'}
                       </td>
-                      <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.authorized_by || '-'}</td>
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.remarks || '-'}</td>
                       <td style={{ padding: '12px 16px' }}><StatusBadge status={item.status} /></td>
                       <td style={{ padding: '12px 16px', color: theme.subText, fontSize: '13px' }}>{item.change_reason || '-'}</td>
