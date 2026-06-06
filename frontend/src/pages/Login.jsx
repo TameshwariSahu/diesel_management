@@ -59,6 +59,13 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    if (!/^\d{8}$/.test(username)) {
+      setError('SAP ID must be exactly 8 digits.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await axios.post(`${API_BASE_URL}/api/auth/login`, { 
         sapId: username, 
@@ -239,12 +246,11 @@ const Login = () => {
             </label>
             <input
               className="login-input"
-              type="number" 
-              placeholder="Enter 7-digit SAP ID"
+              type="text" 
+              inputMode="numeric"
+              placeholder="Enter 8-digit SAP ID"
               value={username}
-              min="1000000"
-              max="9999999"
-              onChange={e => setUsername(e.target.value)}
+              onChange={e => setUsername(e.target.value.replace(/\D/g, '').slice(0, 8))}
               required
               style={{
                 width: '100%', boxSizing: 'border-box',

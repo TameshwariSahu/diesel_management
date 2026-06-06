@@ -57,7 +57,11 @@ const jwt = require("jsonwebtoken");
 exports.login = (req, res) => {
   const { sapId, password, expectedRole } = req.body; 
 
-  const cleanSapId = parseInt(sapId, 10); 
+  const cleanSapId = String(sapId || "").trim();
+
+  if (!/^\d{8}$/.test(cleanSapId)) {
+    return res.status(400).json({ message: "SAP ID must be exactly 8 digits." });
+  }
 
   const sql = "SELECT * FROM employees WHERE sap_id = ?";
 

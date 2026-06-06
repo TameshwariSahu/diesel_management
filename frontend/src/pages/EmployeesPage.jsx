@@ -95,8 +95,8 @@ import { API_BASE_URL } from '../utils/api';
 
 // //   const addEmployee = async (e) => {
 // //     e.preventDefault();
-// //     if (form.sapId.length !== 7) {
-// //       alert("SAP ID must be exactly 7 digits.");
+// //     if (form.sapId.length !== 8) {
+// //       alert("SAP ID must be exactly 8 digits.");
 // //       return;
 // //     }
 // //     try {
@@ -120,7 +120,7 @@ import { API_BASE_URL } from '../utils/api';
 // //         <form onSubmit={addEmployee} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 15, margin: "20px 0", background: theme.cardBg, padding: "20px 0", borderRadius: 16, border: `1px solid ${theme.border}` }}>
           
 // //           <input style={input} placeholder="Full Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-// //           <input style={input} type="number" placeholder="SAP ID (7 Digits)" value={form.sapId} onChange={(e) => setForm({ ...form, sapId: e.target.value })} required />
+// //           <input style={input} type="text" placeholder="SAP ID (8 Digits)" value={form.sapId} onChange={(e) => setForm({ ...form, sapId: e.target.value })} required />
           
 // //           <input style={input} type="password" placeholder="Password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
 // //           <select style={select} value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} required>
@@ -277,8 +277,8 @@ import { API_BASE_URL } from '../utils/api';
 
 //   const addEmployee = async (e) => {
 //     e.preventDefault();
-//     if (form.sapId.length !== 7) {
-//       alert("SAP ID must be exactly 7 digits.");
+//     if (form.sapId.length !== 8) {
+//       alert("SAP ID must be exactly 8 digits.");
 //       return;
 //     }
 //     try {
@@ -314,7 +314,7 @@ import { API_BASE_URL } from '../utils/api';
 //               <input 
 //               style={input} 
 //               type="number" 
-//               placeholder="SAP ID (7 Digits)" 
+//               placeholder="SAP ID (8 Digits)" 
 //               value={form.sapId} 
 //               onChange={(e) => setForm({ ...form, sapId: e.target.value })} 
 //               required 
@@ -535,8 +535,8 @@ export default function EmployeesPage() {
   const saveEmployee = async (e) => {
     e.preventDefault();
     
-    if (form.sapId.length !== 7) {
-      setToast({ show: true, message: "SAP ID must be exactly 7 digits.", type: "error" });
+    if (form.sapId.length !== 8) {
+      setToast({ show: true, message: "SAP ID must be exactly 8 digits.", type: "error" });
       return;
     }
 
@@ -651,10 +651,11 @@ export default function EmployeesPage() {
                 name="emp_sap_id"
                 autoComplete="off"
                 style={input}
-                type="number"
-                placeholder="SAP ID (7 Digits)"
+                type="text"
+                inputMode="numeric"
+                placeholder="SAP ID (8 Digits)"
                 value={form.sapId}
-                onChange={(e) => setForm({ ...form, sapId: e.target.value })}
+                onChange={(e) => setForm({ ...form, sapId: e.target.value.replace(/\D/g, '').slice(0, 8) })}
                 required
               />
             

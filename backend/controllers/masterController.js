@@ -350,9 +350,9 @@ exports.addEmployee = (req, res) => {
   const { name, sapId, password, role, deptId, sectionId, contact } = req.body;
   const cleanName = toTitleCase(name);
 
-  // 1. Validate SAP ID (Must be 7 digits)
-  if (!/^\d{7}$/.test(sapId)) {
-    return res.status(400).json({ message: "SAP ID must be exactly 7 digits." });
+  // 1. Validate SAP ID (Must be 8 digits)
+  if (!/^\d{8}$/.test(sapId)) {
+    return res.status(400).json({ message: "SAP ID must be exactly 8 digits." });
   }
 
   if (contact && !/^\d{10}$/.test(contact)) {
@@ -392,8 +392,8 @@ exports.updateEmployee = (req, res) => {
     return res.status(400).json({ message: "Employee name is required." });
   }
 
-  if (!/^\d{7}$/.test(sapId)) {
-    return res.status(400).json({ message: "SAP ID must be exactly 7 digits." });
+  if (!/^\d{8}$/.test(sapId)) {
+    return res.status(400).json({ message: "SAP ID must be exactly 8 digits." });
   }
 
   if (!['admin', 'employee'].includes(role)) {
