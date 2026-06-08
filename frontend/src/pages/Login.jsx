@@ -73,11 +73,7 @@ const Login = () => {
         expectedRole: loginRole
       });
    
-      console.log("FULL BACKEND RESPONSE:", res.data);
-
-      // ✅ EXPLICITLY get the role from the response
       const backendRole = res.data.user.role;
-      console.log("Extracted Role for Routing:", backendRole);
 
       if (backendRole !== loginRole) {
         setError(loginRole === 'admin'
@@ -90,8 +86,6 @@ const Login = () => {
       // ✅ FIX: Directly check the role. No defaults.
       const targetPath = backendRole === 'admin' ? '/admin' : '/department';
       
-      console.log("Redirecting to:", targetPath);
-
       // ✅ Clear old storage to be safe
       localStorage.clear();
 

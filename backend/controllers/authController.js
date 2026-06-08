@@ -17,12 +17,6 @@
 //     if (results.length === 0) return res.status(401).json({ message: "Invalid credentials" });
 
 //     const user = results[0];
-//     console.log("DEBUG Password Check:", { 
-//     db_password: user.password, 
-//     input_password: password, 
-//     are_equal: user.password === password 
-// });
-
 // if (user.password === password) {
 //   const token = jwt.sign(
 //     {
@@ -71,13 +65,6 @@ exports.login = (req, res) => {
     if (results.length === 0) return res.status(401).json({ message: "Invalid credentials" });
 
     const user = results[0];
-
-    // Optional: Keep this for debugging, remove it later if you want
-    // console.log("DEBUG Password Check:", { 
-    //   db_password: user.password, 
-    //   input_password: password, 
-    //   are_equal: user.password === password 
-    // });
 
     const storedPassword = user.password || '';
     const isHashedPassword = storedPassword.startsWith('$2a$') || storedPassword.startsWith('$2b$') || storedPassword.startsWith('$2y$');
